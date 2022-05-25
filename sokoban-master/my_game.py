@@ -108,15 +108,17 @@ class game:
             x = 0
 
     def can_move(self,x,y, agent):
-        print("can_move", agent[0], agent[1])
         agent = agent
-        print(x," ", y)
         return self.get_content(agent[0]+x,agent[1]+y) not in ['%','#','*','$']
 
     def next(self,x,y, agent ):
-        print("NEXT", agent[0], agent[1])
         agent = agent
         return self.get_content(agent[0]+x,agent[1]+y)
+    """
+    def open_obstacle_agent(self,x,y, agent):
+        return (self.next(x,y,agent) in ['.'])
+    """
+
 
     def can_push(self,x,y,agent):
         return (self.next(x,y,agent) in ['*','$'] and self.next(x+x,y+y,agent) in [' ','.'])
@@ -131,7 +133,7 @@ class game:
 
 
 
-
+    """
     def move_box(self,x,y,a,b):
 #        (x,y) -> move to do
 #        (a,b) -> box to move
@@ -149,7 +151,8 @@ class game:
         elif current_box == '*' and future_box == '.':
             self.set_content(x+a,y+b,'*')
             self.set_content(x,y,'.')
-
+    """
+    """
     def unmove(self,agent):
         if not self.queue.empty():
             movement = self.queue.get()
@@ -159,11 +162,12 @@ class game:
                 self.move_box(current[0]+movement[0],current[1]+movement[1],movement[0] * -1,movement[1] * -1)
             else:
                 self.move(movement[0] * -1,movement[1] * -1, False,agent)
-
-    def move(self,x,y,save, agent = None):
-        print("MOVE ", agent[0], agent[1])
+        """
+    def move(self,x,y,save,  agent_id, agent = None,):
+        print(" X",x," Y",y)
+        print("AGENT ",agent[0], "--", agent[1] )
+       
         agent = agent
-        print("AQUUI ",agent, "---", agent[2])
         
         if self.can_move(x,y, agent):
             current = agent
@@ -172,19 +176,28 @@ class game:
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],' ')
                 if save: self.queue.put((x,y,False))
+            
             elif (current[2] == '@' or current[2] == '=') and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],' ')
                 if save: self.queue.put((x,y,False))
+            
             elif current[2] == '+' and future == ' ':
-                self.set_content(current[0]+x,current[1]+y,current[2])
+                if agent_id == 0:
+                    self.set_content(current[0]+x,current[1]+y,'@')
+                elif agent_id == 1:
+                    self.set_content(current[0]+x,current[1]+y,'=')
+
                 self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
+
             elif current[2] == '+' and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
         
+
+        """
         elif self.can_push(x,y, agent):
             current = agent
             future = self.next(x,y,agent)
@@ -229,7 +242,7 @@ class game:
                 self.set_content(current[0],current[1],'.')
                 self.set_content(current[0]+x,current[1]+y,'+')
                 if save: self.queue.put((x,y,True))
-
+            """
 
 
 
@@ -338,7 +351,7 @@ wall = pygame.image.load('images/wall.png')
 floor = pygame.image.load('images/floor.png')
 box = pygame.image.load('images/box.png')
 box_docked = pygame.image.load('images/box_docked.png')
-agent = pygame.image.load('images/agent1.png')
+agent = pygame.image.load('images/agent.png')
 agent_docked = pygame.image.load('images/agent_dock.png')
 docker = pygame.image.load('images/dock.png')
 background = 255, 226, 191
@@ -355,20 +368,20 @@ while 1:
         if event.type == pygame.QUIT: sys.exit(0)
         elif event.type == pygame.KEYDOWN:
             #Agent
-            if event.key == pygame.K_UP: game.move(0,-1, True,  game.agent())
-            elif event.key == pygame.K_DOWN: game.move(0,1, True, game.agent())
-            elif event.key == pygame.K_LEFT: game.move(-1,0, True,  game.agent())
-            elif event.key == pygame.K_RIGHT: game.move(1,0, True,  game.agent())
+            if event.key == pygame.K_UP: game.move(0,-1, True,0 , game.agent())
+            elif event.key == pygame.K_DOWN: game.move(0,1, True,0 , game.agent())
+            elif event.key == pygame.K_LEFT: game.move(-1,0, True,0 ,  game.agent())
+            elif event.key == pygame.K_RIGHT: game.move(1,0, True,0 ,  game.agent())
             
             #Agent1
-            if event.key == pygame.K_w: game.move(0,-1, True,  game.agent1())
-            elif event.key == pygame.K_s: game.move(0,1, True, game.agent1())
-            elif event.key == pygame.K_a: game.move(-1,0, True,  game.agent1())
-            elif event.key == pygame.K_d: game.move(1,0, True,  game.agent1())
+            if event.key == pygame.K_w: game.move(0,-1, True,1 ,  game.agent1())
+            elif event.key == pygame.K_s: game.move(0,1, True,1 , game.agent1())
+            elif event.key == pygame.K_a: game.move(-1,0, True,1 ,  game.agent1())
+            elif event.key == pygame.K_d: game.move(1,0, True,1 ,  game.agent1())
 
             #
             elif event.key == pygame.K_q: sys.exit(0)
-            elif event.key == pygame.K_t: game.unmove(game.agent())
-            elif event.key == pygame.K_y: game.unmove(game.agent1())
+            #elif event.key == pygame.K_t: game.unmove(game.agent())
+            #elif event.key == pygame.K_y: game.unmove(game.agent1())
 
     pygame.display.update()
