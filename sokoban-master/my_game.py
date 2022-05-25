@@ -10,11 +10,15 @@ class game:
     def is_valid_value(self,char):
         if ( char == ' ' or #floor
             char == '#' or #wall
-            char == '@' or #worker on floor
+            char == '@' or #agent on floor
+            char == '=' or #agent1 on floor
+
             char == '.' or #dock
             char == '*' or #box on dock
             char == '$' or #box
-            char == '+' ): #worker on dock
+            char == '%' or #dividing wall
+           
+            char == '+' ): #agent on dock
             return True
         else:
             return False
@@ -79,7 +83,7 @@ class game:
         else:
             print("ERROR: Value '"+content+"' to be added is not valid")
 
-    def worker(self):
+    def agent(self):
         x = 0
         y = 0
         for row in self.matrix:
@@ -92,10 +96,10 @@ class game:
             x = 0
 
     def can_move(self,x,y):
-        return self.get_content(self.worker()[0]+x,self.worker()[1]+y) not in ['#','*','$']
+        return self.get_content(self.agent()[0]+x,self.agent()[1]+y) not in ['%','#','*','$']
 
     def next(self,x,y):
-        return self.get_content(self.worker()[0]+x,self.worker()[1]+y)
+        return self.get_content(self.agent()[0]+x,self.agent()[1]+y)
 
     def can_push(self,x,y):
         return (self.next(x,y) in ['*','$'] and self.next(x+x,y+y) in [' ','.'])
@@ -129,7 +133,7 @@ class game:
         if not self.queue.empty():
             movement = self.queue.get()
             if movement[2]:
-                current = self.worker()
+                current = self.agent()
                 self.move(movement[0] * -1,movement[1] * -1, False)
                 self.move_box(current[0]+movement[0],current[1]+movement[1],movement[0] * -1,movement[1] * -1)
             else:
@@ -137,7 +141,7 @@ class game:
 
     def move(self,x,y,save):
         if self.can_move(x,y):
-            current = self.worker()
+            current = self.agent()
             future = self.next(x,y)
             if current[2] == '@' and future == ' ':
                 self.set_content(current[0]+x,current[1]+y,'@')
@@ -156,7 +160,7 @@ class game:
                 self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
         elif self.can_push(x,y):
-            current = self.worker()
+            current = self.agent()
             future = self.next(x,y)
             future_box = self.next(x+x,y+y)
             if current[2] == '@' and future == '$' and future_box == ' ':
@@ -206,20 +210,24 @@ def print_game(matrix,screen):
     y = 0
     for row in matrix:
         for char in row:
+            if char == '%': #dividing_wall
+                screen.blit(dividing_wall,(x,y)) 
+            if char == '=': #agent1
+                screen.blit(agent1,(x,y)) 
             if char == ' ': #floor
                 screen.blit(floor,(x,y))
             elif char == '#': #wall
                 screen.blit(wall,(x,y))
-            elif char == '@': #worker on floor
-                screen.blit(worker,(x,y))
+            elif char == '@': #agent on floor
+                screen.blit(agent,(x,y))
             elif char == '.': #dock
                 screen.blit(docker,(x,y))
             elif char == '*': #box on dock
                 screen.blit(box_docked,(x,y))
             elif char == '$': #box
                 screen.blit(box,(x,y))
-            elif char == '+': #worker on dock
-                screen.blit(worker_docked,(x,y))
+            elif char == '+': #agent on dock
+                screen.blit(agent_docked,(x,y))
             x = x + 32
         x = 0
         y = y + 32
@@ -294,13 +302,15 @@ def start_game():
     else:
         print("ERROR: Invalid Level: "+str(level))
         sys.exit(2)
+dividing_wall = pygame.image.load('images/wall1.png')
+agent1 = pygame.image.load('images/agent1.png')
 
 wall = pygame.image.load('images/wall.png')
 floor = pygame.image.load('images/floor.png')
 box = pygame.image.load('images/box.png')
 box_docked = pygame.image.load('images/box_docked.png')
-worker = pygame.image.load('images/worker.png')
-worker_docked = pygame.image.load('images/worker_dock.png')
+agent = pygame.image.load('images/agent.png')
+agent_docked = pygame.image.load('images/agent_dock.png')
 docker = pygame.image.load('images/dock.png')
 background = 255, 226, 191
 pygame.init()
