@@ -95,14 +95,31 @@ class game:
             y = y + 1
             x = 0
 
-    def can_move(self,x,y):
-        return self.get_content(self.agent()[0]+x,self.agent()[1]+y) not in ['%','#','*','$']
+    def agent1(self):
+        x = 0
+        y = 0
+        for row in self.matrix:
+            for pos in row:
+                if pos == '='or pos == '+':
+                    return (x, y, pos)
+                else:
+                    x = x + 1
+            y = y + 1
+            x = 0
 
-    def next(self,x,y):
-        return self.get_content(self.agent()[0]+x,self.agent()[1]+y)
+    def can_move(self,x,y, agent):
+        print("can_move", agent[0], agent[1])
+        agent = agent
+        print(x," ", y)
+        return self.get_content(agent[0]+x,agent[1]+y) not in ['%','#','*','$']
 
-    def can_push(self,x,y):
-        return (self.next(x,y) in ['*','$'] and self.next(x+x,y+y) in [' ','.'])
+    def next(self,x,y, agent ):
+        print("NEXT", agent[0], agent[1])
+        agent = agent
+        return self.get_content(agent[0]+x,agent[1]+y)
+
+    def can_push(self,x,y,agent):
+        return (self.next(x,y,agent) in ['*','$'] and self.next(x+x,y+y,agent) in [' ','.'])
 
     def is_completed(self):
         for row in self.matrix:
@@ -110,6 +127,10 @@ class game:
                 if cell == '$':
                     return False
         return True
+
+
+
+
 
     def move_box(self,x,y,a,b):
 #        (x,y) -> move to do
@@ -129,56 +150,61 @@ class game:
             self.set_content(x+a,y+b,'*')
             self.set_content(x,y,'.')
 
-    def unmove(self):
+    def unmove(self,agent):
         if not self.queue.empty():
             movement = self.queue.get()
             if movement[2]:
-                current = self.agent()
-                self.move(movement[0] * -1,movement[1] * -1, False)
+                current = agent
+                self.move(movement[0] * -1,movement[1] * -1, False,agent)
                 self.move_box(current[0]+movement[0],current[1]+movement[1],movement[0] * -1,movement[1] * -1)
             else:
-                self.move(movement[0] * -1,movement[1] * -1, False)
+                self.move(movement[0] * -1,movement[1] * -1, False,agent)
 
-    def move(self,x,y,save):
-        if self.can_move(x,y):
-            current = self.agent()
-            future = self.next(x,y)
-            if current[2] == '@' and future == ' ':
-                self.set_content(current[0]+x,current[1]+y,'@')
+    def move(self,x,y,save, agent = None):
+        print("MOVE ", agent[0], agent[1])
+        agent = agent
+        print("AQUUI ",agent, "---", agent[2])
+        
+        if self.can_move(x,y, agent):
+            current = agent
+            future = self.next(x,y,agent)
+            if (current[2] == '@' or current[2] == '=') and future == ' ':
+                self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],' ')
                 if save: self.queue.put((x,y,False))
-            elif current[2] == '@' and future == '.':
+            elif (current[2] == '@' or current[2] == '=') and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],' ')
                 if save: self.queue.put((x,y,False))
             elif current[2] == '+' and future == ' ':
-                self.set_content(current[0]+x,current[1]+y,'@')
+                self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
             elif current[2] == '+' and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
-        elif self.can_push(x,y):
-            current = self.agent()
-            future = self.next(x,y)
-            future_box = self.next(x+x,y+y)
-            if current[2] == '@' and future == '$' and future_box == ' ':
+        
+        elif self.can_push(x,y, agent):
+            current = agent
+            future = self.next(x,y,agent)
+            future_box = self.next(x+x,y+y,agent)
+            if (current[2] == '@' or current[2] == '=') and future == '$' and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
-                self.set_content(current[0]+x,current[1]+y,'@')
+                self.set_content(current[0]+x,current[1]+y,current[2])
                 if save: self.queue.put((x,y,True))
-            elif current[2] == '@' and future == '$' and future_box == '.':
+            elif (current[2] == '@' or current[2] == '=') and future == '$' and future_box == '.':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
-                self.set_content(current[0]+x,current[1]+y,'@')
+                self.set_content(current[0]+x,current[1]+y,current[2])
                 if save: self.queue.put((x,y,True))
-            elif current[2] == '@' and future == '*' and future_box == ' ':
+            elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
                 self.set_content(current[0]+x,current[1]+y,'+')
                 if save: self.queue.put((x,y,True))
-            elif current[2] == '@' and future == '*' and future_box == '.':
+            elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box == '.':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
                 self.set_content(current[0]+x,current[1]+y,'+')
@@ -186,7 +212,7 @@ class game:
             if current[2] == '+' and future == '$' and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],'.')
-                self.set_content(current[0]+x,current[1]+y,'@')
+                self.set_content(current[0]+x,current[1]+y,current[2])
                 if save: self.queue.put((x,y,True))
             elif current[2] == '+' and future == '$' and future_box == '.':
                 self.move_box(current[0]+x,current[1]+y,x,y)
@@ -203,6 +229,9 @@ class game:
                 self.set_content(current[0],current[1],'.')
                 self.set_content(current[0]+x,current[1]+y,'+')
                 if save: self.queue.put((x,y,True))
+
+
+
 
 def print_game(matrix,screen):
     screen.fill(background)
@@ -309,7 +338,7 @@ wall = pygame.image.load('images/wall.png')
 floor = pygame.image.load('images/floor.png')
 box = pygame.image.load('images/box.png')
 box_docked = pygame.image.load('images/box_docked.png')
-agent = pygame.image.load('images/agent.png')
+agent = pygame.image.load('images/agent1.png')
 agent_docked = pygame.image.load('images/agent_dock.png')
 docker = pygame.image.load('images/dock.png')
 background = 255, 226, 191
@@ -325,10 +354,21 @@ while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit(0)
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP: game.move(0,-1, True)
-            elif event.key == pygame.K_DOWN: game.move(0,1, True)
-            elif event.key == pygame.K_LEFT: game.move(-1,0, True)
-            elif event.key == pygame.K_RIGHT: game.move(1,0, True)
+            #Agent
+            if event.key == pygame.K_UP: game.move(0,-1, True,  game.agent())
+            elif event.key == pygame.K_DOWN: game.move(0,1, True, game.agent())
+            elif event.key == pygame.K_LEFT: game.move(-1,0, True,  game.agent())
+            elif event.key == pygame.K_RIGHT: game.move(1,0, True,  game.agent())
+            
+            #Agent1
+            if event.key == pygame.K_w: game.move(0,-1, True,  game.agent1())
+            elif event.key == pygame.K_s: game.move(0,1, True, game.agent1())
+            elif event.key == pygame.K_a: game.move(-1,0, True,  game.agent1())
+            elif event.key == pygame.K_d: game.move(1,0, True,  game.agent1())
+
+            #
             elif event.key == pygame.K_q: sys.exit(0)
-            elif event.key == pygame.K_d: game.unmove()
+            elif event.key == pygame.K_t: game.unmove(game.agent())
+            elif event.key == pygame.K_y: game.unmove(game.agent1())
+
     pygame.display.update()
