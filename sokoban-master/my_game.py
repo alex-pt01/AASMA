@@ -87,6 +87,7 @@ class game:
         x = 0
         y = 0
         for row in self.matrix:
+            
             for pos in row:
                 if pos == '@' or pos == '+':
                     return (x, y, pos)
@@ -133,54 +134,41 @@ class game:
 
 
 
-    """
-    def move_box(self,x,y,a,b):
-#        (x,y) -> move to do
-#        (a,b) -> box to move
-        current_box = self.get_content(x,y)
-        future_box = self.get_content(x+a,y+b)
-        if current_box == '$' and future_box == ' ':
-            self.set_content(x+a,y+b,'$')
-            self.set_content(x,y,' ')
-        elif current_box == '$' and future_box == '.':
-            self.set_content(x+a,y+b,'*')
-            self.set_content(x,y,' ')
-        elif current_box == '*' and future_box == ' ':
-            self.set_content(x+a,y+b,'$')
-            self.set_content(x,y,'.')
-        elif current_box == '*' and future_box == '.':
-            self.set_content(x+a,y+b,'*')
-            self.set_content(x,y,'.')
-    """
-    """
-    def unmove(self,agent):
-        if not self.queue.empty():
-            movement = self.queue.get()
-            if movement[2]:
-                current = agent
-                self.move(movement[0] * -1,movement[1] * -1, False,agent)
-                self.move_box(current[0]+movement[0],current[1]+movement[1],movement[0] * -1,movement[1] * -1)
-            else:
-                self.move(movement[0] * -1,movement[1] * -1, False,agent)
-        """
+
     def move(self,x,y,save,  agent_id, agent = None,):
+        print()
         print(" X",x," Y",y)
-        print("AGENT ",agent[0], "--", agent[1] )
-       
+
+        print("A: ", self.agent())
         agent = agent
         
         if self.can_move(x,y, agent):
             current = agent
+            #print("get content ",self.get_content(agent[0]+x,agent[1]+y) )
             future = self.next(x,y,agent)
+            print("FUTURE ", future)
+            print("agent0 ", self.agent())
+            print("agent1 ", self.agent1())
+            print("current: ",current[0], " current[1]: ", current[1] )
+            print("current[0]+x: ",current[0]+x, " current[1]+y: ", current[1]+y)
+
             if (current[2] == '@' or current[2] == '=') and future == ' ':
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],' ')
                 if save: self.queue.put((x,y,False))
             
             elif (current[2] == '@' or current[2] == '=') and future == '.':
+                
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],' ')
-                if save: self.queue.put((x,y,False))
+                
+                #OBSTACLE 1
+
+                for x in range(3): #meter 10
+                    if(self.get_content(x,current[1]+y-1) == '$'):
+                        self.set_content(x,current[1]+y-1,' ')
+
+
             
             elif current[2] == '+' and future == ' ':
                 if agent_id == 0:
@@ -189,60 +177,16 @@ class game:
                     self.set_content(current[0]+x,current[1]+y,'=')
 
                 self.set_content(current[0],current[1],'.')
-                if save: self.queue.put((x,y,False))
+                #if save: self.queue.put((x,y,False))
 
             elif current[2] == '+' and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
-                if save: self.queue.put((x,y,False))
+
+                #if save: self.queue.put((x,y,False))
         
 
-        """
-        elif self.can_push(x,y, agent):
-            current = agent
-            future = self.next(x,y,agent)
-            future_box = self.next(x+x,y+y,agent)
-            if (current[2] == '@' or current[2] == '=') and future == '$' and future_box == ' ':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],' ')
-                self.set_content(current[0]+x,current[1]+y,current[2])
-                if save: self.queue.put((x,y,True))
-            elif (current[2] == '@' or current[2] == '=') and future == '$' and future_box == '.':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],' ')
-                self.set_content(current[0]+x,current[1]+y,current[2])
-                if save: self.queue.put((x,y,True))
-            elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box == ' ':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],' ')
-                self.set_content(current[0]+x,current[1]+y,'+')
-                if save: self.queue.put((x,y,True))
-            elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box == '.':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],' ')
-                self.set_content(current[0]+x,current[1]+y,'+')
-                if save: self.queue.put((x,y,True))
-            if current[2] == '+' and future == '$' and future_box == ' ':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],'.')
-                self.set_content(current[0]+x,current[1]+y,current[2])
-                if save: self.queue.put((x,y,True))
-            elif current[2] == '+' and future == '$' and future_box == '.':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],'.')
-                self.set_content(current[0]+x,current[1]+y,'+')
-                if save: self.queue.put((x,y,True))
-            elif current[2] == '+' and future == '*' and future_box == ' ':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],'.')
-                self.set_content(current[0]+x,current[1]+y,'+')
-                if save: self.queue.put((x,y,True))
-            elif current[2] == '+' and future == '*' and future_box == '.':
-                self.move_box(current[0]+x,current[1]+y,x,y)
-                self.set_content(current[0],current[1],'.')
-                self.set_content(current[0]+x,current[1]+y,'+')
-                if save: self.queue.put((x,y,True))
-            """
+
 
 
 
