@@ -146,12 +146,13 @@ class game:
                 if save: self.queue.put((x,y,False))
             elif current[2] == '+' and future == ' ':
                 self.set_content(current[0]+x,current[1]+y,'@')
-                self.set_content(current[0],current[1],'.')
+                self.set_content(current[0],current[1   
                 if save: self.queue.put((x,y,False))
             elif current[2] == '+' and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
+        
         elif self.can_push(x,y):
             current = self.worker()
             future = self.next(x,y)

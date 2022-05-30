@@ -4,6 +4,7 @@ import sys
 import pygame
 import string
 import queue
+import random
 
 class game:
 
@@ -17,7 +18,19 @@ class game:
             char == '*' or #box on dock
             char == '$' or #box
             char == '%' or #dividing wall
-           
+            
+            char == '1' or #num1
+            char == '2' or #num2
+            char == '3' or #num3
+            char == '4' or #num4
+            char == '5' or #num5
+
+            char == 'a' or #dock_num1
+            char == 'b' or #dock_num2
+            char == 'c' or #dock_num3
+            char == 'd' or #dock_num4
+            char == 'e' or #dock_num5
+
             char == '+' ): #agent on dock
             return True
         else:
@@ -110,7 +123,7 @@ class game:
 
     def can_move(self,x,y, agent):
         agent = agent
-        return self.get_content(agent[0]+x,agent[1]+y) not in ['%','#','*','$']
+        return self.get_content(agent[0]+x,agent[1]+y) not in ['%','#','*','$','1','2','3','4','5']
 
     def next(self,x,y, agent ):
         agent = agent
@@ -122,7 +135,9 @@ class game:
 
 
     def can_push(self,x,y,agent):
-        return (self.next(x,y,agent) in ['*','$'] and self.next(x+x,y+y,agent) in [' ','.'])
+        options = ['1','2','3','4','5','a','b','c','d','e']
+        boxes_in_dock = ['a','b','c','d','e', ' ']
+        return (self.next(x,y,agent) in options and self.next(x+x,y+y,agent) in boxes_in_dock)
 
     def is_completed(self):
         for row in self.matrix:
@@ -131,11 +146,32 @@ class game:
                     return False
         return True
 
+    def move_box(self,x,y,a,b):
+#        (x,y) -> move to do
+#        (a,b) -> box to move
+        current_box = self.get_content(x,y)
+        future_box = self.get_content(x+a,y+b)
+        boxes = ['1','2','3','4','5']
+        boxes_in_dock = ['a','b','c','d','e']
+
+        if current_box in boxes and future_box == ' ':
+            self.set_content(x+a,y+b,current_box)
+            self.set_content(x,y,' ')
+        elif current_box in boxes and future_box in boxes_in_dock[boxes.index(current_box)]:
+            self.set_content(x+a,y+b,'*')
+            self.set_content(x,y,' ')
+        elif current_box == '*' and future_box == ' ':
+            self.set_content(x+a,y+b,current_box)
+            self.set_content(x,y,boxes_in_dock[boxes.index(current_box)])
+        elif current_box == '*' and future_box in boxes_in_dock[boxes.index(current_box)]:
+            self.set_content(x+a,y+b,'*')
+            self.set_content(x,y,boxes_in_dock[boxes.index(current_box)])
 
 
 
 
-    def move(self,x,y,save,  agent_id, agent = None,):
+    def move(self,x,y,save,  agent_id, agent):
+        print("Agent id ", agent_id)
         print()
         print(" X",x," Y",y)
 
@@ -151,20 +187,21 @@ class game:
             print("agent1 ", self.agent1())
             print("current: ",current[0], " current[1]: ", current[1] )
             print("current[0]+x: ",current[0]+x, " current[1]+y: ", current[1]+y)
+            boxes = ['1','2','3','4','5']
+            boxes_in_dock = ['a','b','c','d','e','.']
 
             if (current[2] == '@' or current[2] == '=') and future == ' ':
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],' ')
                 if save: self.queue.put((x,y,False))
             
-            elif (current[2] == '@' or current[2] == '=') and future == '.':
-                
+            elif (current[2] == '@' or current[2] == '=') and future in boxes_in_dock:
+                print("aqui 111111")
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],' ')
                 
                 #OBSTACLE 1
-
-                for x in range(3): #meter 10
+                for x in range(10): #put 10
                     if(self.get_content(x,current[1]+y-1) == '$'):
                         self.set_content(x,current[1]+y-1,' ')
 
@@ -176,15 +213,84 @@ class game:
                 elif agent_id == 1:
                     self.set_content(current[0]+x,current[1]+y,'=')
 
-                self.set_content(current[0],current[1],'.')
+                self.set_content(current[0],current[1],future)
                 #if save: self.queue.put((x,y,False))
 
+
+
+            elif current[2] == '+' and future == 'a':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'a')
+                #if save: self.queue.put((x,y,False))
+            elif current[2] == '+' and future == 'b':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'b')
+            elif current[2] == '+' and future == 'c':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'c')
+                #if save: self.queue.put((x,y,False))
+            elif current[2] == '+' and future == 'd':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'d')
+            elif current[2] == '+' and future == 'e':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'e')
             elif current[2] == '+' and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
 
-                #if save: self.queue.put((x,y,False))
-        
+
+
+        elif self.can_push(x,y,agent):
+            current = agent
+            future = self.next(x,y,agent)
+            future_box = self.next(x+x,y+y,agent)
+            boxes = ['1','2','3','4','5']
+            boxes_in_dock = ['a','b','c','d','e']
+            if (current[2] == '@'  or current[2] == '=') and future in boxes and future_box == ' ':
+                print("F1 box ", future)
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],' ')
+                self.set_content(current[0]+x,current[1]+y,current[2])
+                #if save: self.queue.put((x,y,True))
+            elif (current[2] == '@' or current[2] == '=') and future in boxes and future_box in boxes_in_dock[boxes.index(future)]:
+                print("F1 box ", future)
+                print("Future__: ", boxes_in_dock[boxes.index(future)])
+
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],' ')
+                self.set_content(current[0]+x,current[1]+y,current[2])
+                if save: self.queue.put((x,y,True))
+            elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box == ' ':
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],' ')
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+            elif c(current[2] == '@' or current[2] == '=') and future == '*' and future_box in boxes_in_dock[boxes.index(future)]:
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],' ')
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+            if current[2] == '+' and future in boxes and future_box == ' ':
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
+                self.set_content(current[0]+x,current[1]+y,current[2])
+                if save: self.queue.put((x,y,True))
+            elif current[2] == '+' and future in boxes and future_box in boxes_in_dock[boxes.index(future)]:
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+            elif current[2] == '+' and future == '*' and future_box == ' ':
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+            elif current[2] == '+' and future == '*' and future_box in boxes_in_dock[boxes.index(future)]:
+                self.move_box(current[0]+x,current[1]+y,x,y)
+                self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
 
 
 
@@ -214,6 +320,30 @@ def print_game(matrix,screen):
                 screen.blit(box,(x,y))
             elif char == '+': #agent on dock
                 screen.blit(agent_docked,(x,y))
+
+            elif char == '1': #num1
+                screen.blit(num1,(x,y))
+            elif char == '2': #num2
+                screen.blit(num2,(x,y))
+            elif char == '3': #num3
+                screen.blit(num3,(x,y))
+            elif char == '4': #num4
+                screen.blit(num4,(x,y))
+            elif char == '5': #num5
+                screen.blit(num5,(x,y))
+
+            elif char == 'a': #dock_num1
+                screen.blit(dock_num1,(x,y))
+            elif char == 'b': #dock_num2
+                screen.blit(dock_num2,(x,y))
+            elif char == 'c': #dock_num3
+                screen.blit(dock_num3,(x,y))
+            elif char == 'd': #dock_num4
+                screen.blit(dock_num4,(x,y))
+            elif char == 'e': #dock_num5
+                screen.blit(dock_num5,(x,y))
+
+
             x = x + 32
         x = 0
         y = y + 32
@@ -293,11 +423,25 @@ agent1 = pygame.image.load('images/agent1.png')
 
 wall = pygame.image.load('images/wall.png')
 floor = pygame.image.load('images/floor.png')
-box = pygame.image.load('images/box.png')
+box = pygame.image.load('images/bomx.png')
 box_docked = pygame.image.load('images/box_docked.png')
 agent = pygame.image.load('images/agent.png')
 agent_docked = pygame.image.load('images/agent_dock.png')
 docker = pygame.image.load('images/dock.png')
+
+num1 = pygame.image.load('images/n1.png')
+num2 = pygame.image.load('images/n2.png')
+num3 = pygame.image.load('images/n3.png')
+num4 = pygame.image.load('images/n4.png')
+num5 = pygame.image.load('images/n5.png')
+
+dock_num1 = pygame.image.load('images/dock_n1.png')
+dock_num2 = pygame.image.load('images/dock_n2.png')
+dock_num3 = pygame.image.load('images/dock_n3.png')
+dock_num4 = pygame.image.load('images/dock_n4.png')
+dock_num5 = pygame.image.load('images/dock_n5.png')
+
+
 background = 255, 226, 191
 pygame.init()
 
@@ -305,12 +449,28 @@ level = start_game()
 game = game('my_levels',level)
 size = game.load_size()
 screen = pygame.display.set_mode(size)
+
+#agent actions
+actions = ['DOWN', 'LEFT','UP','RIGHT']			
+
 while 1:
     if game.is_completed(): display_end(screen)
     print_game(game.get_matrix(),screen)
+    #RANDOM AGENT
+    
+    
+    action = random.choice(actions)	
+    if action == 'UP': game.move(0,-1, True,0 , game.agent())
+    elif action == 'DOWN': game.move(0,1, True,0 , game.agent())
+    elif action == 'LEFT': game.move(-1,0, True,0 ,  game.agent())
+    elif action == 'RIGHT': game.move(1,0, True,0 ,  game.agent())
+        
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit(0)
         elif event.type == pygame.KEYDOWN:
+
+            """
+            #USER INPUT
             #Agent
             if event.key == pygame.K_UP: game.move(0,-1, True,0 , game.agent())
             elif event.key == pygame.K_DOWN: game.move(0,1, True,0 , game.agent())
@@ -327,5 +487,5 @@ while 1:
             elif event.key == pygame.K_q: sys.exit(0)
             #elif event.key == pygame.K_t: game.unmove(game.agent())
             #elif event.key == pygame.K_y: game.unmove(game.agent1())
-
+            """
     pygame.display.update()
