@@ -99,12 +99,41 @@ class game:
             print("ERROR: Value '"+content+"' to be added is not valid")
 
     def agent_position(self, agent):
+        
         x = 0
         y = 0
+        if agent.id ==1:
+            for row in self.matrix:
+                for i in range(6):
+                    if row[i] == '@' or row[i] == '+':
+                        return (x, y, row[i])
+                    else:
+                        x = x + 1
+                y = y + 1
+                x = 0
+
+
+        elif agent.id ==2:
+            for row in self.matrix:
+                for i in range(6):
+                    if row[i+5] == '=' or row[i+5] == '+':
+                        return (x, y, row[i+5])
+                    else:
+                        x = x + 1
+                y = y + 1
+                x = 5
+
+        else: 
+            raiseExceptions
+            print("Invalid Id")
+
+        '''
         for row in self.matrix:
-            
+            print(len(row))
+            #taalla virhus
             for pos in row:
                 if agent.id ==1:
+                    print(pos)
                     if pos == '@' or pos == '+':
                         return (x, y, pos)
                     else:
@@ -119,7 +148,7 @@ class game:
                     print("Invalid Id")
             y = y + 1
             x = 0
-
+            '''
 
     def can_move(self,x,y, agent):
         agent = agent
@@ -174,7 +203,7 @@ class game:
 
 
         agent_position = self.agent_position(agent)
-        
+        print(agent_position )
         if self.can_move(x,y, agent_position):
             current = agent_position
             #print("get content ",self.get_content(agent[0]+x,agent[1]+y) )
@@ -197,7 +226,7 @@ class game:
             elif (current[2] == '@' or current[2] == '=') and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],' ')
-                
+            
                 #OBSTACLE 1
                 for x in range(10): #put 10
                     if(self.get_content(x,current[1]+y-1) == '$'):
@@ -206,12 +235,14 @@ class game:
 
             
             elif current[2] == '+' and future == ' ':
+                
                 if agent.id == 1:
                     self.set_content(current[0]+x,current[1]+y,'@')
                 elif agent.id == 2:
                     self.set_content(current[0]+x,current[1]+y,'=')
 
                 self.set_content(current[0],current[1],'.')
+        
                 #if save: self.queue.put((x,y,False))
 
 
@@ -234,6 +265,7 @@ class game:
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'e')
             elif current[2] == '+' and future == '.':
+                print("virhe")
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
             
@@ -504,6 +536,7 @@ while 1:
     elif action == 'RIGHT': game.move(1,0, True,  a1)
 
     #Agent2
+
     action = random.choice(a2.actions())	
     if action == 'UP': game.move(0,-1, True, a2)
     elif action == 'DOWN': game.move(0,1, True, a2)
