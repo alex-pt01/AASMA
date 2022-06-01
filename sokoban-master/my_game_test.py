@@ -8,25 +8,18 @@ import queue
 import random
 import time
 from agent import Agent
-
 class game:
     a1_dock = False
     a2_dock = False
     def is_valid_value(self,char):
-        if ( char == ' 'or #floor
+        if ( char == ' ' or #floor
             char == '#' or #wall
-            
-            char == '@' or #agent1
-            char == '=' or #agent2
-            
-            char == '+' or #agent1 on dock
-            char == '-' or #agent2 on dock           
-            char == '.' or #button
-            
-            char == '*' or #box on right place 
-            char == '!' or #box on wrong place 
+            char == '@' or #agent on floor
+            char == '=' or #agent1 on floor
 
-            char == '$' or #barrier
+            char == '.' or #dock
+            char == '*' or #box on dock
+            char == '$' or #box
             char == '%' or #dividing wall
             
             char == '1' or #num1
@@ -35,14 +28,13 @@ class game:
             char == '4' or #num4
             char == '5' or #num5
 
-            char == 'a' or #box on dock_num1
-            char == 'b' or #box on dock_num2
-            char == 'c' or #box on dock_num3
-            char == 'd' or #box on dock_num4
-            char == 'e' or #box on dock_num5
-            
-            char == 'z' #finish
-            ):
+            char == 'a' or #dock_num1
+            char == 'b' or #dock_num2
+            char == 'c' or #dock_num3
+            char == 'd' or #dock_num4
+            char == 'e' or #dock_num5
+            char == 'z' or
+            char == '+' ): #agent on dock
             return True
         else:
             return False
@@ -77,6 +69,8 @@ class game:
                     else:
                         break
 
+
+
     def load_size(self):
         x = 0
         y = len(self.matrix)
@@ -96,27 +90,14 @@ class game:
                 sys.stdout.flush()
             sys.stdout.write('\n')
 
-    def is_completed(self):
-        for row in self.matrix:
-            for cell in row:
-                if cell == 'z':
-                    return False
-        return True
-
-
-
     def get_content(self,x,y):
         return self.matrix[y][x]
-
 
     def set_content(self,x,y,content):
         if self.is_valid_value(content):
             self.matrix[y][x] = content
         else:
             print("ERROR: Value '"+content+"' to be added is not valid")
-
-
-
 
     def agent_position(self, agent):
         
@@ -136,33 +117,62 @@ class game:
         elif agent.id ==2:
             for row in self.matrix:
                 for i in range(6):
-                    if row[i+5] == '=' or row[i+5] == '-':
+                    if row[i+5] == '=' or row[i+5] == '+':
                         return (x, y, row[i+5])
                     else:
                         x = x + 1
                 y = y + 1
                 x = 5
 
-        else:
+        else: 
             raiseExceptions
             print("Invalid Id")
 
+        '''
+        for row in self.matrix:
+            print(len(row))
+            #taalla virhus
+            for pos in row:
+                if agent.id ==1:
+                    print(pos)
+                    if pos == '@' or pos == '+':
+                        return (x, y, pos)
+                    else:
+                        x = x + 1
+                elif agent.id ==2 :
+                    if pos == '=' or pos == '+':
+                        return (x, y, pos)
+                    else:
+                        x = x + 1
+                else:
+                    raiseExceptions
+                    print("Invalid Id")
+            y = y + 1
+            x = 0
+            '''
 
     def can_move(self,x,y, agent):
-        return self.get_content(agent[0]+x,agent[1]+y) not in ['%','#','*', '$','1','2','3','4','5']
+        agent = agent
+        return self.get_content(agent[0]+x,agent[1]+y) not in ['%','#','*','$','1','2','3','4','5']
 
     def next(self,x,y, agent ):
+        agent = agent
         return self.get_content(agent[0]+x,agent[1]+y)
     """
     def open_obstacle_agent(self,x,y, agent):
         return (self.next(x,y,agent) in ['.'])
     """
     def can_push(self,x,y,agent):
-        options = ['1','2','3','4','5', 'a','b','c','d','e']#boxes and boxes in dock
-        boxes_in_dock = ['a','b','c','d','e', ' '] #boxes and floor 
+        options = ['1','2','3','4','5','a','b','c','d','e']
+        boxes_in_dock = ['a','b','c','d','e', ' ']
         return (self.next(x,y,agent) in options and self.next(x+x,y+y,agent) in boxes_in_dock)
 
-    
+    def is_completed(self):
+        for row in self.matrix:
+            for cell in row:
+                if cell == 'z':
+                    return False
+        return True
 
     def move_box(self,x,y,a,b):
 #        (x,y) -> move to do
@@ -175,29 +185,23 @@ class game:
         if current_box in boxes and future_box == ' ':
             self.set_content(x+a,y+b,current_box)
             self.set_content(x,y,' ')
-
         elif current_box in boxes and future_box in boxes_in_dock[boxes.index(current_box)]:
-            print("AQUI 1")
-            print(current_box, "---", future_box)
-            self.set_content(x+a,y+b,'*') #same 
+            self.set_content(x+a,y+b,'*')
             self.set_content(x,y,' ')
-
         elif current_box == '*' and future_box == ' ':
             self.set_content(x+a,y+b,current_box)
             self.set_content(x,y,boxes_in_dock[boxes.index(current_box)])
-
         elif current_box == '*' and future_box in boxes_in_dock[boxes.index(current_box)]:
-            print("AQUI 2")
-
             self.set_content(x+a,y+b,'*')
             self.set_content(x,y,boxes_in_dock[boxes.index(current_box)])
 
 
-    
+
 
     def move(self,x,y,save, agent):
         print()
         print(" X",x," Y",y)
+
 
         agent_position = self.agent_position(agent)
         print(agent_position )
@@ -206,40 +210,38 @@ class game:
             #print("get content ",self.get_content(agent[0]+x,agent[1]+y) )
             future = self.next(x,y,agent_position)
 
-            print(self.agent_position(a1)[2], " --- ", self.agent_position(a2)[2])
+            print("Agent ID :", agent.id, "FUTURE ", future)
 
             #print("current: ",current[0], " current[1]: ", current[1] )
             #print("current[0]+x: ",current[0]+x, " current[1]+y: ", current[1]+y)
             boxes = ['1','2','3','4','5']
-            boxes_in_dock = ['a','b','c','d','e'] #VER .
+            boxes_in_dock = ['a','b','c','d','e','.']
 
             if (current[2] == '@' or current[2] == '=') and future == ' ':
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],' ')
-                #if save: self.queue.put((x,y,False))
+                if save: self.queue.put((x,y,False))
+            
             
 
-
-
-            elif (current[2] == '@' or current[2] == '=') and future in '.':
-                print("ENTROU ", current[2])
-                #TODO if to separece agent colors
-                if agent.id == 1:
-                    self.set_content(current[0]+x,current[1]+y,'+')
-                elif agent.id == 2:
-                    print("agent id = 2")
-                    self.set_content(current[0]+x,current[1]+y,'-')
+            elif (current[2] == '@' or current[2] == '=') and future == '.':
+                if(current[2] == '@'): 
+                    self.a1_dock = True
+                if(current[2] == '='): 
+                    self.a2_dock = True
+                self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],' ')
-                
-                #TODO if to separece colors
+            
                 #OBSTACLE 1
-                if (self.agent_position(a1)[2] == '+' and self.agent_position(a2)[2] == '-'):
+                if(self.a1_dock and self.a2_dock):
                     for x in range(10): #put 10
                         if(self.get_content(x,current[1]+y-1) == '$'):
                             self.set_content(x,current[1]+y-1,' ')
 
 
-            elif (current[2] == '+' or current[2] == '-') and future == ' ':
+            
+            elif current[2] == '+' and future == ' ':
+                
                 if agent.id == 1:
                     self.a1_dock = False
                     self.set_content(current[0]+x,current[1]+y,'@')
@@ -251,16 +253,35 @@ class game:
         
                 #if save: self.queue.put((x,y,False))
 
-            elif (current[2] == '+' or current[2] == '-') and future == boxes_in_dock:
-                self.set_content(current[0]+x,current[1]+y,current[2])
-                self.set_content(current[0],current[1],boxes_in_dock)
-                #if save: self.queue.put((x,y,False))
-            
 
+
+            elif current[2] == '+' and future == 'a':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'a')
+                #if save: self.queue.put((x,y,False))
+            elif current[2] == '+' and future == 'b':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'b')
+            elif current[2] == '+' and future == 'c':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'c')
+                #if save: self.queue.put((x,y,False))
+            elif current[2] == '+' and future == 'd':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'d')
+            elif current[2] == '+' and future == 'e':
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'e')
+            elif current[2] == '+' and future == '.':
+                print("virhe")
+                self.set_content(current[0]+x,current[1]+y,'+')
+                self.set_content(current[0],current[1],'.')
+            
             #finish line
             elif (current[2] == '@' or current[2] == '=')  and future == 'z':
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],' ')
+                       
 
 
 
@@ -271,68 +292,51 @@ class game:
             boxes = ['1','2','3','4','5']
             boxes_in_dock = ['a','b','c','d','e']
             if (current[2] == '@'  or current[2] == '=') and future in boxes and future_box == ' ':
-                print("#1")
+                print("F1 box ", future)
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 #if save: self.queue.put((x,y,True))
             elif (current[2] == '@' or current[2] == '=') and future in boxes and future_box in boxes_in_dock[boxes.index(future)]:
-                print("#2")
+                print("F1 box ", future)
+                print("Future__: ", boxes_in_dock[boxes.index(future)])
 
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
                 self.set_content(current[0]+x,current[1]+y,current[2])
-                #if save: self.queue.put((x,y,True))
+                if save: self.queue.put((x,y,True))
             elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box == ' ':
-                print("#3")
-
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
-                if agent.id == 1:
-                    self.set_content(current[0]+x,current[1]+y,'+')
-                elif agent.id == 2:
-                    self.set_content(current[0]+x,current[1]+y,'-')
-       
-                #if save: self.queue.put((x,y,True))
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
             elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box in boxes_in_dock[boxes.index(future)]:
-                print("#4")
-
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
-                if agent.id == 1:
-                    self.set_content(current[0]+x,current[1]+y,'+')
-                elif agent.id == 2:
-                    self.set_content(current[0]+x,current[1]+y,'-')
-                #if save: self.queue.put((x,y,True))
-            if (current[2] == '+' or current[2] == '-') and future in boxes and future_box == ' ':
-                print("#5")
-
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+            if current[2] == '+' and future in boxes and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
                 self.set_content(current[0]+x,current[1]+y,current[2])
-                #if save: self.queue.put((x,y,True))
-            elif (current[2] == '+' or current[2] == '-') and future in boxes and future_box in boxes_in_dock[boxes.index(future)]:
-                print("#6")
-
+                if save: self.queue.put((x,y,True))
+            elif current[2] == '+' and future in boxes and future_box in boxes_in_dock[boxes.index(future)]:
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
-                self.set_content(current[0]+x,current[1]+y,current[2])
-
-                #if save: self.queue.put((x,y,True))
-            elif (current[2] == '+' or current[2] == '-') and future == '*' and future_box == ' ':
-                print("#7")
-
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+            elif current[2] == '+' and future == '*' and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
-                self.set_content(current[0]+x,current[1]+y,current[2])
-                #if save: self.queue.put((x,y,True))
-            elif (current[2] == '+' or current[2] == '-') and future == '*' and future_box in boxes_in_dock[boxes.index(future)]:
-                print("#8")
-
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+            elif current[2] == '+' and future == '*' and future_box in boxes_in_dock[boxes.index(future)]:
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
-                self.set_content(current[0]+x,current[1]+y,current[2])
-                #if save: self.queue.put((x,y,True))
+                self.set_content(current[0]+x,current[1]+y,'+')
+                if save: self.queue.put((x,y,True))
+
+
         agent_position = None    
 """
 font_name = pygame.font.match_font('arial')
@@ -357,32 +361,22 @@ def print_game(matrix,screen):
         for char in row:
             if char == '%': #dividing_wall
                 screen.blit(dividing_wall,(x,y)) 
-            elif char == '#': #wall
-                screen.blit(wall,(x,y))
-
-            elif char == '=': #agent2
+            if char == '=': #agent1
                 screen.blit(agent1,(x,y)) 
-            elif char == '@': #agent1 
-                screen.blit(agent,(x,y))
             if char == ' ': #floor
                 screen.blit(floor,(x,y))
- 
-
-            elif char == '.': #button
+            elif char == '#': #wall
+                screen.blit(wall,(x,y))
+            elif char == '@': #agent on floor
+                screen.blit(agent,(x,y))
+            elif char == '.': #dock
                 screen.blit(docker,(x,y))
-
-            elif char == '*': #box on right place
-                screen.blit(box_right_place,(x,y))
-            elif char == '!': #box on wrong place
-                screen.blit(box_wrong_place,(x,y))
-
-            elif char == '$': #barrier
+            elif char == '*': #box on dock
+                screen.blit(box_docked,(x,y))
+            elif char == '$': #box
                 screen.blit(box,(x,y))
-
-            elif char == '+': #agent1 on dock
+            elif char == '+': #agent on dock
                 screen.blit(agent_docked,(x,y))
-            elif char == '-': #agent2 on dock
-                screen.blit(agent1_docked,(x,y))
 
             elif char == '1': #num1
                 screen.blit(num1,(x,y))
@@ -499,13 +493,9 @@ agent1 = pygame.image.load('images/agent1.png')
 wall = pygame.image.load('images/wall.png')
 floor = pygame.image.load('images/floor.png')
 box = pygame.image.load('images/bomx.png')
-box_right_place = pygame.image.load('images/box_docked.png')
-box_wrong_place = pygame.image.load('images/box_docked_wrong.png')
+box_docked = pygame.image.load('images/box_docked.png')
 agent = pygame.image.load('images/agent.png')
-
 agent_docked = pygame.image.load('images/agent_dock.png')
-agent1_docked = pygame.image.load('images/agent_dock1.png')
-
 docker = pygame.image.load('images/dock.png')
 
 num1 = pygame.image.load('images/n1.png')
@@ -536,11 +526,12 @@ a1 = Agent(1)
 a2 = Agent(2)
 
 while 1:
-    #time.sleep(0.5)
+   
+    time.sleep(0.5)
 
     if game.is_completed(): display_end(screen)
     print_game(game.get_matrix(),screen)
-    
+    '''
     #one agent
     #if game_option == 'Y':
     
@@ -560,8 +551,8 @@ while 1:
     elif action == 'DOWN': game.move(0,1, True, a2)
     elif action == 'LEFT': game.move(-1,0, True,  a2)
     elif action == 'RIGHT': game.move(1,0, True,  a2)
-      
-
+    
+'''
 
 
 
@@ -569,11 +560,11 @@ while 1:
     
    # elif game_option == 'X':
    #USER INPUT
-    """
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit(0)
         elif event.type == pygame.KEYDOWN:
             #USER INPUT
+            
             #Agent1
             if event.key == pygame.K_UP: game.move(0,-1, True, a1)
             elif event.key == pygame.K_DOWN: game.move(0,1, True, a1)
@@ -587,8 +578,8 @@ while 1:
             elif event.key == pygame.K_d: game.move(1,0, True,  a2)
             
             #
-            #elif event.key == pygame.K_q: sys.exit(0)
-            #elif event.key == pygame.K_t: game.unmove(game.agent())
-            #elif event.key == pygame.K_y: game.unmove(game.agent1())
-     """
-    pygame.display.update()
+            elif event.key == pygame.K_q: sys.exit(0)
+            elif event.key == pygame.K_t: game.unmove(game.agent())
+            elif event.key == pygame.K_y: game.unmove(game.agent1())
+          
+        pygame.display.update()

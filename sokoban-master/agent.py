@@ -5,6 +5,6 @@ class Agent:
 
     def actions(self):
         return ['DOWN', 'LEFT','UP','RIGHT']	
-		
+	
 
         
