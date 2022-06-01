@@ -196,7 +196,7 @@ class game:
             self.set_content(x,y,boxes_in_dock[boxes.index(current_box)])
 
 
-    
+
 
     def move(self,x,y,save, agent):
         print()
@@ -229,7 +229,6 @@ class game:
                     self.a1_dock = True
                 if(current[2] == '='): 
                     self.a2_dock = True
-
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],' ')
             
@@ -274,6 +273,7 @@ class game:
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'e')
             elif current[2] == '+' and future == '.':
+                print("virhe")
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
             
@@ -526,11 +526,12 @@ a1 = Agent(1)
 a2 = Agent(2)
 
 while 1:
+   
     time.sleep(0.5)
 
     if game.is_completed(): display_end(screen)
     print_game(game.get_matrix(),screen)
-    
+    '''
     #one agent
     #if game_option == 'Y':
     
@@ -551,12 +552,12 @@ while 1:
     elif action == 'LEFT': game.move(-1,0, True,  a2)
     elif action == 'RIGHT': game.move(1,0, True,  a2)
     
+'''
 
 
 
 
-
-    """
+    
    # elif game_option == 'X':
    #USER INPUT
     for event in pygame.event.get():
@@ -565,20 +566,20 @@ while 1:
             #USER INPUT
             
             #Agent1
-            #if event.key == pygame.K_UP: game.move(0,-1, True, a1)
-            #elif event.key == pygame.K_DOWN: game.move(0,1, True, a1)
-            #elif event.key == pygame.K_LEFT: game.move(-1,0, True, a1)
-            #elif event.key == pygame.K_RIGHT: game.move(1,0, True,  a1)
+            if event.key == pygame.K_UP: game.move(0,-1, True, a1)
+            elif event.key == pygame.K_DOWN: game.move(0,1, True, a1)
+            elif event.key == pygame.K_LEFT: game.move(-1,0, True, a1)
+            elif event.key == pygame.K_RIGHT: game.move(1,0, True,  a1)
                 
             #Agent2
-            #if event.key == pygame.K_w: game.move(0,-1, True, a2)
-            #elif event.key == pygame.K_s: game.move(0,1, True, a2)
-            #elif event.key == pygame.K_a: game.move(-1,0, True,  a2)
-            #elif event.key == pygame.K_d: game.move(1,0, True,  a2)
+            if event.key == pygame.K_w: game.move(0,-1, True, a2)
+            elif event.key == pygame.K_s: game.move(0,1, True, a2)
+            elif event.key == pygame.K_a: game.move(-1,0, True,  a2)
+            elif event.key == pygame.K_d: game.move(1,0, True,  a2)
             
             #
-            #elif event.key == pygame.K_q: sys.exit(0)
-            #elif event.key == pygame.K_t: game.unmove(game.agent())
-            #elif event.key == pygame.K_y: game.unmove(game.agent1())
-     """       
-    pygame.display.update()
+            elif event.key == pygame.K_q: sys.exit(0)
+            elif event.key == pygame.K_t: game.unmove(game.agent())
+            elif event.key == pygame.K_y: game.unmove(game.agent1())
+          
+        pygame.display.update()
