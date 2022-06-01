@@ -161,9 +161,12 @@ class game:
         return (self.next(x,y,agent) in ['.'])
     """
     def can_push(self,x,y,agent):
-        options = ['1','2','3','4','5','!']#boxes and boxes in dock
-        boxes_in_dock = ['a','b','c','d','e', ' '] #boxes and floor 
-        return (self.next(x,y,agent) in options and self.next(x+x,y+y,agent) in boxes_in_dock)
+        if x != 0:
+            return False
+        else:
+            options = ['1','2','3','4','5','!']#boxes and boxes in dock
+            boxes_in_dock = ['a','b','c','d','e', ' '] #boxes and floor 
+            return (self.next(x,y,agent) in options and self.next(x+x,y+y,agent) in boxes_in_dock)
 
     
     def check_box_order(self,cur_box):
@@ -184,7 +187,7 @@ class game:
             #Opens the door when puzzle 2 is solved
             print("here")
             for i in range(11):
-                if(self.get_content(i,4) == '$'):
+                if(self.get_content(i,4) == '$'): # this has to be changes if wall is moved!!
                     self.set_content(i,4,' ')
 
             return True
@@ -352,6 +355,8 @@ class game:
             boxes_in_dock = ['a','b','c','d','e']
             print(future)
             print(future_box)
+            print(x)
+            print(y)
 
             if (current[2] == '@'  or current[2] == '=') and future in boxes and future_box == ' ':
                 print("#1")
