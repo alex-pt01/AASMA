@@ -3,7 +3,7 @@
 import sys
 import pygame
 import string
-import queue
+import Queue
 
 class game:
 
@@ -20,11 +20,10 @@ class game:
             return False
 
     def __init__(self,filename,level):
-        self.queue = queue.LifoQueue()
+        self.queue = Queue.LifoQueue()
         self.matrix = []
 #        if level < 1 or level > 50:
-        if int(level) < 1:
-            print("ERROR: Level "+str(level)+" is out of range")
+        if level < 1:
             sys.exit(1)
         else:
             file = open(filename,'r')
@@ -43,7 +42,6 @@ class game:
                             elif c == '\n': #jump to next row when newline
                                 continue
                             else:
-                                print("ERROR: Level "+str(level)+" has invalid value "+c)
                                 sys.exit(1)
                         self.matrix.append(row)
                     else:
@@ -74,7 +72,7 @@ class game:
         if self.is_valid_value(content):
             self.matrix[y][x] = content
         else:
-            print("ERROR: Value '"+content+"' to be added is not valid")
+            print("ERROR: Value '",content,"' to be added is not valid")
 
     def worker(self):
         x = 0
@@ -146,13 +144,12 @@ class game:
                 if save: self.queue.put((x,y,False))
             elif current[2] == '+' and future == ' ':
                 self.set_content(current[0]+x,current[1]+y,'@')
-                self.set_content(current[0],current[1   
+                self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
             elif current[2] == '+' and future == '.':
                 self.set_content(current[0]+x,current[1]+y,'+')
                 self.set_content(current[0],current[1],'.')
                 if save: self.queue.put((x,y,False))
-        
         elif self.can_push(x,y):
             current = self.worker()
             future = self.next(x,y)
@@ -198,9 +195,6 @@ class game:
                 self.set_content(current[0]+x,current[1]+y,'+')
                 if save: self.queue.put((x,y,True))
 
-
-
-
 def print_game(matrix,screen):
     screen.fill(background)
     x = 0
@@ -224,10 +218,6 @@ def print_game(matrix,screen):
             x = x + 32
         x = 0
         y = y + 32
-
-
-
-
 
 
 def get_key():
@@ -254,8 +244,6 @@ def display_box(screen, message):
                 ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
   pygame.display.flip()
 
-
-
 def display_end(screen):
     message = "Level Completed"
     fontobject = pygame.font.Font(None,18)
@@ -276,8 +264,7 @@ def ask(screen, question):
   "ask(screen, question) -> answer"
   pygame.font.init()
   current_string = []
-  display_box(screen, question + ": " + "".join(current_string)
-)
+  display_box(screen, question + ": " + string.join(current_string,""))
   while 1:
     inkey = get_key()
     if inkey == pygame.K_BACKSPACE:
@@ -288,18 +275,15 @@ def ask(screen, question):
       current_string.append("_")
     elif inkey <= 127:
       current_string.append(chr(inkey))
-    display_box(screen, question + ": " + "".join(current_string)
-)
-  return "".join(current_string)
-
+    display_box(screen, question + ": " + string.join(current_string,""))
+  return string.join(current_string,"")
 
 def start_game():
     start = pygame.display.set_mode((320,240))
     level = ask(start,"Select Level")
-    if int(level) > 0:
+    if level > 0:
         return level
     else:
-        print("ERROR: Invalid Level: "+str(level))
         sys.exit(2)
 
 wall = pygame.image.load('images/wall.png')
@@ -311,7 +295,6 @@ worker_docked = pygame.image.load('images/worker_dock.png')
 docker = pygame.image.load('images/dock.png')
 background = 255, 226, 191
 pygame.init()
-
 
 level = start_game()
 game = game('levels',level)
