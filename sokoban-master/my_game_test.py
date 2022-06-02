@@ -165,6 +165,8 @@ class game:
         #agent can only push boxes up or down
         if x != 0:
             return False
+        elif (y<0 and agent[1] <=7) or (y>0 and agent[1]>=16) :
+            return False
         else:
             options = ['1','2','3','4','5','!','o','p']#boxes and boxes in dock
             boxes_in_dock = ['a','b','c','d','e', ' ','.'] #boxes and floor 
