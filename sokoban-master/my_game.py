@@ -6,50 +6,17 @@ import queue
 import random
 import time
 from agent import Agent
-
+from viewer import *
+from consts import BLACK,RED,BLUE
+from functions import is_valid_value
 class game:
     
     last_box = ''
     puzzle2= False
     a1_dock = False
     a2_dock = False
-    def is_valid_value(self,char):
-        if ( char == ' 'or #floor
-            char == '#' or #wall
-            
-            char == '@' or #agent1
-            char == '=' or #agent2
-            
-            char == '+' or #agent1 on dock
-            char == '-' or #agent2 on dock           
-            char == '.' or #button
-            
-            char == '*' or #box on right place 
-            char == '!' or #box on wrong place 
+    
 
-            char == '$' or #barrier
-            char == '%' or #dividing wall
-            
-            char == '1' or #num1
-            char == '2' or #num2
-            char == '3' or #num3
-            char == '4' or #num4
-            char == '5' or #num5
-
-            char == 'a' or #box on dock_num1
-            char == 'b' or #box on dock_num2
-            char == 'c' or #box on dock_num3
-            char == 'd' or #box on dock_num4
-            char == 'e' or #box on dock_num5
-            char == 'p' or #box 2 on . dock
-            char == 'o' or #box 3 on . dock
-            char == 'l' or #agent1 on number docks
-            char == 'm' or #agent2 on number docks
-            char == 'z' #finish
-            ):
-            return True
-        else:
-            return False
 
     def __init__(self,filename,level):
         self.queue = queue.LifoQueue()
@@ -70,7 +37,7 @@ class game:
                     if line.strip() != "":
                         row = []
                         for c in line:
-                            if c != '\n' and self.is_valid_value(c):
+                            if c != '\n' and is_valid_value(c):
                                 row.append(c)
                             elif c == '\n': #jump to next row when newline
                                 continue
@@ -100,11 +67,6 @@ class game:
                 sys.stdout.flush()
             sys.stdout.write('\n')
 
-
-
-
-
-
     def is_completed(self):
         for row in self.matrix:
             for cell in row:
@@ -112,25 +74,16 @@ class game:
                     return False
         return True
 
-
-
-
-
     def get_content(self,x,y):
         return self.matrix[y][x]
 
-
     def set_content(self,x,y,content):
-        if self.is_valid_value(content):
+        if is_valid_value(content):
             self.matrix[y][x] = content
         else:
             print("ERROR: Value '"+content+"' to be added is not valid")
 
-
-
-
     def agent_position(self, agent):
-        
         x = 0
         y = 0
         if agent.id ==1:
@@ -158,16 +111,12 @@ class game:
             raiseExceptions
             print("Invalid Id")
 
-
     def can_move(self,x,y, agent):
         return self.get_content(agent[0]+x,agent[1]+y) not in ['%','#','*', '$','1','2','3','4','5', '!','o','p']
 
     def next(self,x,y, agent ):
         return self.get_content(agent[0]+x,agent[1]+y)
-    """
-    def open_obstacle_agent(self,x,y, agent):
-        return (self.next(x,y,agent) in ['.'])
-    """
+
     def can_push(self,x,y,agent):
         #agent can only push boxes up or down
         if x != 0:
@@ -178,7 +127,6 @@ class game:
             options = ['1','2','3','4','5','!','o','p']#boxes and boxes in dock
             boxes_in_dock = ['a','b','c','d','e', ' ','.'] #boxes and floor 
             return (self.next(x,y,agent) in options and self.next(x+x,y+y,agent) in boxes_in_dock)
-
     
     def check_box_order(self,cur_box):
         if(self.last_box == '' and cur_box == '1'):
@@ -351,6 +299,7 @@ class game:
                     self.set_content(current[0],current[1],'b')
                 else:
                     self.set_content(current[0],current[1],'e')
+          
             #agent step on colored dock to other colored dock
             elif (current[2] == 'l' or current[2] == 'm') and future in docks:
                 if agent.id == 1:
@@ -377,7 +326,6 @@ class game:
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],boxes_in_dock)
                 #if save: self.queue.put((x,y,False))
-            
 
             #finish line
             elif (current[2] == '@' or current[2] == '=')  and future == 'z':
@@ -509,22 +457,8 @@ class game:
                 elif agent.id == 2:
                     self.set_content(current[0]+x,current[1]+y,'-')
         agent_position = None    
-"""
-font_name = pygame.font.match_font('arial')
-def draw_text(surf, text, size, x, y):
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, WHITE)
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-    surf.blit(text_surface, text_rect)
-"""    
+
 def print_game(matrix,screen):
-    """
-    screen.fill(BLACK)
-    screen.blit(background, background_rect)
-    all_sprites.draw(screen)
-    draw_text(screen, str(score), 18, WIDTH / 2, 10)
-    """
     screen.fill(background)
     x = 0
     y = 0
@@ -543,26 +477,20 @@ def print_game(matrix,screen):
                 screen.blit(agent,(x,y)) #agent1 on numbered dock
             elif char == 'm':
                 screen.blit(agent1,(x,y)) #agent2 on numbered dock
-            if char == ' ': #floor
+            elif char == ' ': #floor
                 screen.blit(floor,(x,y))
- 
-
             elif char == '.': #button
                 screen.blit(docker,(x,y))
-
             elif char == '*': #box on right place
                 screen.blit(box_right_place,(x,y))
             elif char == '!': #box on wrong place
                 screen.blit(box_wrong_place,(x,y))
-
             elif char == '$': #barrier
                 screen.blit(box,(x,y))
-
             elif char == '+': #agent1 on dock
                 screen.blit(agent_docked,(x,y))
             elif char == '-': #agent2 on dock
                 screen.blit(agent1_docked,(x,y))
-
             elif char == '1': #num1
                 screen.blit(num1,(x,y))
             elif char == '2': #num2
@@ -573,7 +501,6 @@ def print_game(matrix,screen):
                 screen.blit(num4,(x,y))
             elif char == '5': #num5
                 screen.blit(num5,(x,y))
-
             elif char == 'a': #dock_num1
                 screen.blit(dock_num1,(x,y))
             elif char == 'b': #dock_num2
@@ -584,8 +511,6 @@ def print_game(matrix,screen):
                 screen.blit(dock_num4,(x,y))
             elif char == 'e': #dock_num5
                 screen.blit(dock_num5,(x,y))
-
-
             elif char == 'p': #box2 on dock .
                 screen.blit(num2,(x,y))
             elif char == 'o':  #box3 on dock .
@@ -593,7 +518,6 @@ def print_game(matrix,screen):
 
             elif char == 'z': #dock_num5
                 screen.blit(finish,(x,y))
-
             x = x + 32
         x = 0
         y = y + 32
@@ -638,9 +562,6 @@ def display_end(screen):
                 ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
     pygame.display.flip()
 
-
-
-
 def ask(screen, question):
   "ask(screen, question) -> answer"
   pygame.font.init()
@@ -661,44 +582,31 @@ def ask(screen, question):
 )
   return "".join(current_string)
 
-
 def start_game():
     start = pygame.display.set_mode((320,240))
-
-    #game_option = ask(pygame.display.set_mode((320,1500)),"Game option: \nX: one agent\n Y: agent1 vs agent2\n Z: user vs agent2")
-
     level = ask(start,"Select Level")
     if int(level) > 0: # and (game_option=='X' or game_option=='Y' or game_option=='Z'):
         return level #, game_option
     else:
         print("ERROR: Invalid Level or game option: "+str(level))
         sys.exit(2)
-
-
-
-
-    
+  
 dividing_wall = pygame.image.load('images/wall1.png')
 agent1 = pygame.image.load('images/agent1.png')
-
 wall = pygame.image.load('images/wall.png')
 floor = pygame.image.load('images/floor.png')
 box = pygame.image.load('images/bomx.png')
 box_right_place = pygame.image.load('images/box_docked.png')
 box_wrong_place = pygame.image.load('images/box_docked_wrong.png')
 agent = pygame.image.load('images/agent.png')
-
 agent_docked = pygame.image.load('images/agent_dock.png')
 agent1_docked = pygame.image.load('images/agent_dock1.png')
-
 docker = pygame.image.load('images/dock.png')
-
 num1 = pygame.image.load('images/n1.png')
 num2 = pygame.image.load('images/n2.png')
 num3 = pygame.image.load('images/n3.png')
 num4 = pygame.image.load('images/n4.png')
 num5 = pygame.image.load('images/n5.png')
-
 dock_num1 = pygame.image.load('images/dock_n1.png')
 dock_num2 = pygame.image.load('images/dock_n2.png')
 dock_num3 = pygame.image.load('images/dock_n3.png')
@@ -716,24 +624,13 @@ size = game.load_size()
 print(size)
 screen = pygame.display.set_mode(size)
 
-
-
-
-
 #SCORE
-# Define some colors
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-RED = (250,0,0) 
-BLUE = (0,0,255) 
-
 clock = pygame.time.Clock()
 #Initialise player scores
 steps_A1 = 0
 steps_A2 = 0
 #This will be a list that will contain all the sprites we intend to use in our game.
 all_sprites_list = pygame.sprite.Group()
-
 
 #actions = ['DOWN', 'LEFT','UP','RIGHT']	
 a1 = Agent(1)		
@@ -773,14 +670,7 @@ while 1:
         game.move(1,0, True,  a2)
         steps_A2 +=1
     
-
-
-    
     #SCORE-------------------------------------------------
-    # First, clear the screen to black. 
-    
-    #screen.fill(BLACK)
-    
     #Draw the net
     pygame.draw.line(screen, BLACK, (60, 80), (130, 100), 1)
 
@@ -813,10 +703,6 @@ while 1:
     #-------------------------------------------------
 
 
-
-
-
-    
    # elif game_option == 'X':
    #USER INPUT
     """
