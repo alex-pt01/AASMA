@@ -1,4 +1,3 @@
-#!../bin/python
 from logging import raiseExceptions
 import sys
 import pygame
@@ -713,43 +712,7 @@ screen = pygame.display.set_mode(size)
 #actions = ['DOWN', 'LEFT','UP','RIGHT']	
 a1 = Agent(1)		
 a2 = Agent(2)
-
 while 1:
-    #time.sleep(0.5)
-
-    if game.is_completed(): display_end(screen)
-    print_game(game.get_matrix(),screen)
-    
-    '''
-    #one agent
-    #if game_option == 'Y':
-    
-    #RANDOM AGENT
-    #Agent1
-    
-    action = random.choice(a1.actions())	
-    if action == 'UP': game.move(0,-1, True, a1)
-    elif action == 'DOWN': game.move(0,1, True, a1)
-    elif action == 'LEFT': game.move(-1,0, True,  a1)
-    elif action == 'RIGHT': game.move(1,0, True,  a1)
-
-    #Agent2
-
-    action = random.choice(a2.actions())	
-    if action == 'UP': game.move(0,-1, True, a2)
-    elif action == 'DOWN': game.move(0,1, True, a2)
-    elif action == 'LEFT': game.move(-1,0, True,  a2)
-    elif action == 'RIGHT': game.move(1,0, True,  a2)
-    
-'''
-
-
-
-
-    a1 = Agent(1)		
-    a2 = Agent(2)
-while 1:
-    #time.sleep(0.5)
 
     if game.is_completed(): display_end(screen)
     print_game(game.get_matrix(),screen)
