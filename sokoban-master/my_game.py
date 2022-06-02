@@ -88,7 +88,7 @@ class game:
             print(row)
             if len(row) > x:
                 x = len(row)
-        return (x * 32, y * 32)
+        return (x * 32, y * 32+50)
 
     def get_matrix(self):
         return self.matrix
@@ -100,12 +100,19 @@ class game:
                 sys.stdout.flush()
             sys.stdout.write('\n')
 
+
+
+
+
+
     def is_completed(self):
         for row in self.matrix:
             for cell in row:
                 if cell == 'z':
                     return False
         return True
+
+
 
 
 
@@ -706,37 +713,104 @@ pygame.init()
 level= start_game()
 game = game('my_levels',level)
 size = game.load_size()
+print(size)
 screen = pygame.display.set_mode(size)
 
-#agent actions
+
+
+
+
+#SCORE
+# Define some colors
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+RED = (250,0,0) 
+BLUE = (0,0,255) 
+
+clock = pygame.time.Clock()
+#Initialise player scores
+steps_A1 = 0
+steps_A2 = 0
+#This will be a list that will contain all the sprites we intend to use in our game.
+all_sprites_list = pygame.sprite.Group()
+
+
 #actions = ['DOWN', 'LEFT','UP','RIGHT']	
 a1 = Agent(1)		
 a2 = Agent(2)
 while 1:
-
     if game.is_completed(): display_end(screen)
     print_game(game.get_matrix(),screen)
     
-    #one agent
-    #if game_option == 'Y':
-    
     #RANDOM AGENT
     #Agent1
-    
     action = random.choice(a1.actions())	
-    if action == 'UP': game.move(0,-1, True, a1)
-    elif action == 'DOWN': game.move(0,1, True, a1)
-    elif action == 'LEFT': game.move(-1,0, True,  a1)
-    elif action == 'RIGHT': game.move(1,0, True,  a1)
-
+    if action == 'UP': 
+        game.move(0,-1, True, a1)
+        steps_A1 +=1
+    elif action == 'DOWN': 
+        game.move(0,1, True, a1)
+        steps_A1 +=1
+    elif action == 'LEFT': 
+        game.move(-1,0, True,  a1)
+        steps_A1 +=1
+    elif action == 'RIGHT': 
+        game.move(1,0, True,  a1)
+        steps_A1 +=1
+    
     #Agent2
-
     action = random.choice(a2.actions())	
-    if action == 'UP': game.move(0,-1, True, a2)
-    elif action == 'DOWN': game.move(0,1, True, a2)
-    elif action == 'LEFT': game.move(-1,0, True,  a2)
-    elif action == 'RIGHT': game.move(1,0, True,  a2)
-      
+    if action == 'UP': 
+        game.move(0,-1, True, a2)
+        steps_A2 +=1
+    elif action == 'DOWN': 
+        game.move(0,1, True, a2)
+        steps_A2 +=1
+    elif action == 'LEFT': 
+        game.move(-1,0, True,  a2)
+        steps_A2 +=1
+    elif action == 'RIGHT': 
+        game.move(1,0, True,  a2)
+        steps_A2 +=1
+    
+
+
+    
+    #SCORE-------------------------------------------------
+    # First, clear the screen to black. 
+    
+    #screen.fill(BLACK)
+    
+    #Draw the net
+    pygame.draw.line(screen, BLACK, (60, 80), (130, 100), 1)
+
+    #Now let's draw all the sprites in one go. (For now we only have 2 sprites!)
+    all_sprites_list.draw(screen) 
+ 
+    #Display scores:
+    font = pygame.font.Font(None, 22)
+    #Agents
+    text = font.render(str("Agent_1"), 1, BLUE)
+    screen.blit(text, (15,644))   
+    text = font.render(str("Agent_2"), 1, RED)
+    screen.blit(text, (15,667))  
+    #time
+    text = font.render(str("Time: "), 1, BLACK)
+    screen.blit(text, (100,644))   
+    text = font.render(str("Time: "), 1, BLACK)
+    screen.blit(text, (100,667))  
+    #steps
+    text = font.render(str("Steps: " +  str(steps_A1)), 1, BLACK)
+    screen.blit(text, (220,644))
+    text = font.render(str("Steps: " +  str(steps_A2)), 1, BLACK)
+    screen.blit(text, (220,667))
+ 
+    # --- Go ahead and update the screen with what we've drawn.
+    pygame.display.flip()
+     
+    # --- Limit to 60 frames per second
+    clock.tick(60)
+    #-------------------------------------------------
 
 
 
