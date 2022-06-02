@@ -301,7 +301,7 @@ class game:
                     self.set_content(current[0]+x,current[1]+y,'=')
 
                 self.set_content(current[0],current[1],'.')
-            
+            #agent stepping on colored dock
             elif (current[2] == '@' or current[2] == '=') and future in docks:
     
                 if agent.id == 1:
@@ -309,7 +309,8 @@ class game:
                 elif agent.id == 2:
                    self.set_content(current[0]+x,current[1]+y,'m')
                 self.set_content(current[0],current[1],' ')
-                
+
+            #agent on colored docks
             elif (current[2] == 'l' or current[2] == 'm') and future == ' ':
                 if agent.id == 1:
                   
@@ -328,8 +329,26 @@ class game:
                     self.set_content(current[0],current[1],'b')
                 else:
                     self.set_content(current[0],current[1],'e')
+            #agent step on colored dock to other colored dock
+            elif (current[2] == 'l' or current[2] == 'm') and future in docks:
+                if agent.id == 1:
+                  
+                    self.set_content(current[0]+x,current[1]+y,'l')
+                elif agent.id == 2:
+              
+                    self.set_content(current[0]+x,current[1]+y,'m')
 
-        
+                if(current[0] == 1 ):
+                    self.set_content(current[0],current[1],'a')
+                elif(current[0] == 3 ):
+                    self.set_content(current[0],current[1],'c')
+                elif(current[0] == 4 ):
+                    self.set_content(current[0],current[1],'d')
+                elif(current[0] == 6 ):
+                    self.set_content(current[0],current[1],'b')
+                else:
+                    self.set_content(current[0],current[1],'e')
+
                 #if save: self.queue.put((x,y,False))
 
             elif (current[2] == '+' or current[2] == '-') and future == boxes_in_dock:
