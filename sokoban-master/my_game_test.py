@@ -163,7 +163,7 @@ class game:
         #agent can only push boxes up or down
         if x != 0:
             return False
-        elif (y<0 and agent[1] <=10) or (y>0 and agent[1]>=16) :
+        elif (y<0 and agent[1] <=10) or (y>0 and agent[1]>=13) :
             return False
         else:
             options = ['1','2','3','4','5','!','o','p']#boxes and boxes in dock
@@ -258,7 +258,7 @@ class game:
                 self.set_content(x+a,y+b,'3') #same 
                 self.set_content(x,y,'.')
 
-                
+
     def reset(self):
         self.box_in_dock_a1 = False
         self.box_in_dock_a2 = False

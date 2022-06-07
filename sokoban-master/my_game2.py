@@ -166,7 +166,7 @@ class game:
         #agent can only push boxes up or down
         if x != 0:
             return False
-        elif (y<0 and agent[1] <=10) or (y>0 and agent[1]>=16) :
+        elif (y<0 and agent[1] <=10) or (y>0 and agent[1]>=13) :
             return False
         else:
             options = ['1','2','3','4','5','!','o','p']#boxes and boxes in dock
@@ -174,33 +174,6 @@ class game:
             return (self.next(x,y,agent) in options and self.next(x+x,y+y,agent) in boxes_in_dock)
 
     
-
-    '''
-    def check_box_order(self,cur_box, agent):
-        if(self.last_box == '' and cur_box == '1'):
-            self.last_box = '1'
-            return True
-        elif(self.last_box == '1' and cur_box == '2'):
-            self.last_box = '2'
-            return True
-        elif(self.last_box == '2' and cur_box == '3'):
-            self.last_box = '3'
-            return True
-        elif(self.last_box == '3' and cur_box == '4'):
-            self.last_box = '4'
-            return True
-        elif(self.last_box == '4' and cur_box == '5'):
-            self.last_box = '5'
-            #Opens the door when puzzle 2 is solved
-            print("here")
-            for i in range(11):
-                if(self.get_content(i,4) == '$'): # this has to be changes if wall is moved!!
-                    self.set_content(i,4,' ')
-
-            return True
-        else:
-            return False
-    '''
     def move_box(self,x,y,a,b):
 #        (x,y) -> move to do
 #        (a,b) -> box to move
