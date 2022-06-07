@@ -6,6 +6,9 @@ import queue
 import random
 import time
 from agent import Agent
+#from viewer import *
+from consts import BLACK,RED,BLUE
+from functions import is_valid_value
 
 class game:
     
@@ -739,56 +742,90 @@ level= start_game()
 game = game('my_levels',level)
 size = game.load_size()
 screen = pygame.display.set_mode(size)
-
+steps_A1 = 0
+steps_A2 = 0
 #agent actions
 #actions = ['DOWN', 'LEFT','UP','RIGHT']	
+clock = pygame.time.Clock()
+all_sprites_list = pygame.sprite.Group()
 a1 = Agent(1)		
 a2 = Agent(2)
-
 while 1:
-    #time.sleep(0.5)
-
-     #if game.is_completed(): display_end(screen)
-    if game.is_completed():
-        game.reset()
-        #SCORE
-        clock = pygame.time.Clock()
-        #Initialise player scores
-        steps_A1 = 0
-        steps_A2 = 0
+    if game.is_completed(): display_end(screen)
     print_game(game.get_matrix(),screen)
-    
-    '''
-    #one agent
-    #if game_option == 'Y':
     
     #RANDOM AGENT
     #Agent1
     action = random.choice(a1.actions())	
-    if action == 'UP': game.move(0,-1, True, a1)
-    elif action == 'DOWN': game.move(0,1, True, a1)
-    elif action == 'LEFT': game.move(-1,0, True,  a1)
-    elif action == 'RIGHT': game.move(1,0, True,  a1)
-
+    if action == 'UP': 
+        game.move(0,-1, True, a1)
+    
+        steps_A1 +=1
+    elif action == 'DOWN': 
+        game.move(0,1, True, a1)
+        steps_A1 +=1
+    elif action == 'LEFT': 
+        game.move(-1,0, True,  a1)
+        steps_A1 +=1
+    elif action == 'RIGHT': 
+        game.move(1,0, True,  a1)
+        steps_A1 +=1
+    
     #Agent2
     action = random.choice(a2.actions())	
-    if action == 'UP': game.move(0,-1, True, a2)
-    elif action == 'DOWN': game.move(0,1, True, a2)
-    elif action == 'LEFT': game.move(-1,0, True,  a2)
-    elif action == 'RIGHT': game.move(1,0, True,  a2)
+    if action == 'UP': 
+        game.move(0,-1, True, a2)
+        steps_A2 +=1
+    elif action == 'DOWN': 
+        game.move(0,1, True, a2)
+        steps_A2 +=1
+    elif action == 'LEFT': 
+        game.move(-1,0, True,  a2)
+        steps_A2 +=1
+    elif action == 'RIGHT': 
+        game.move(1,0, True,  a2)
+        steps_A2 +=1
     
-   '''
+    #SCORE-------------------------------------------------
+    #Draw the net
+    pygame.draw.line(screen, BLACK, (60, 80), (130, 100), 1)
 
-    a1 = Agent(1)		
-    a2 = Agent(2)
+    #Now let's draw all the sprites in one go. (For now we only have 2 sprites!)
+    all_sprites_list.draw(screen) 
+ 
+    #Display scores:
+    font = pygame.font.Font(None, 22)
+    #Agents
+    text = font.render(str("Agent_1"), 1, BLUE)
+    screen.blit(text, (15,644))   
+    text = font.render(str("Agent_2"), 1, RED)
+    screen.blit(text, (15,667))  
+    #time
+    text = font.render(str("Time: "), 1, BLACK)
+    screen.blit(text, (100,644))   
+    text = font.render(str("Time: "), 1, BLACK)
+    screen.blit(text, (100,667))  
+    #steps
+    text = font.render(str("Steps: " +  str(steps_A1)), 1, BLACK)
+    screen.blit(text, (220,644))
+    text = font.render(str("Steps: " +  str(steps_A2)), 1, BLACK)
+    screen.blit(text, (220,667))
+ 
+    # --- Go ahead and update the screen with what we've drawn.
+    pygame.display.flip()
+     
+    # --- Limit to 60 frames per second
+    clock.tick(60)
+    #-------------------------------------------------
+
 
    # elif game_option == 'X':
    #USER INPUT
+    """
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit(0)
         elif event.type == pygame.KEYDOWN:
             #USER INPUT
-            
             #Agent1
             if event.key == pygame.K_UP: game.move(0,-1, True, a1)
             elif event.key == pygame.K_DOWN: game.move(0,1, True, a1)
@@ -802,8 +839,8 @@ while 1:
             elif event.key == pygame.K_d: game.move(1,0, True,  a2)
             
             #
-            elif event.key == pygame.K_q: sys.exit(0)
-            elif event.key == pygame.K_t: game.unmove(game.agent())
-            elif event.key == pygame.K_y: game.unmove(game.agent1())
-          
-        pygame.display.update()
+            #elif event.key == pygame.K_q: sys.exit(0)
+            #elif event.key == pygame.K_t: game.unmove(game.agent())
+            #elif event.key == pygame.K_y: game.unmove(game.agent1())
+     """
+    pygame.display.update()
