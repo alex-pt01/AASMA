@@ -724,7 +724,15 @@ all_sprites_list = pygame.sprite.Group()
 a1 = Agent(1)		
 a2 = Agent(2)
 while 1:
-    if game.is_completed(): display_end(screen)
+    if game.is_completed():
+        game.reset()
+        
+
+        #SCORE
+        clock = pygame.time.Clock()
+        #Initialise player scores
+        steps_A1 = 0
+        steps_A2 = 0
     print_game(game.get_matrix(),screen)
     
     #RANDOM AGENT
