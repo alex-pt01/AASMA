@@ -35,5 +35,41 @@ def is_valid_value(char):
         return True
     else:
         return 
+
+
+
+
+def get_coordinates_puzzle13(filename):
+    with open(filename, "r") as file:
+        layout = file.readlines()
+        layout = [x.replace('\n','') for x in layout]
+        layout = [','.join(layout[i]) for i in range(len(layout))]
+        layout = [x.split(',') for x in layout]
+        maxColsNum = max([len(x) for x in layout])
+        wall_coordinates = []
+
+        goal_coordinate = set()
+        #agent_button = set()
+        #end_flag = set()
+
+        initial_player_location = (0,0)
+        rows = 0
+
+        for irow in range(len(layout)):
+            rows +=1
+            for icol in range(len(layout[irow])):
+
+                if layout[irow][icol] == '#' or layout[irow][icol] == '*':
+                    wall_coordinates.append((irow,icol)) 
+                elif layout[irow][icol] == '.' or layout[irow][icol] == 'z':
+                    goal_coordinate = (irow,icol)
+                elif layout[irow][icol] == '@': 
+                    initial_player_location = (irow,icol) 
+            colsNum = len(layout[irow])
+
+            if colsNum < maxColsNum:
+                layout[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
+
+        return rows,colsNum,initial_player_location, wall_coordinates, goal_coordinate 
         
 
