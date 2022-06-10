@@ -5,46 +5,40 @@ from functions import get_coordinates_puzzle13
 
 
 class puzzle13:
-    def __init__(self,filename, actions = ["U", "D", "L", "R"],discount = 0.9 ,learning_rate =0.9, greedy=0.9 ):
+    def __init__(self,filename,):
         self.filename = filename
-        self.actions = actions
-        self.discount = discount
-        self.learning_rate = learning_rate
+        self.actions = ["Left", "Right", "Up", "Down"]
         self.length =  get_coordinates_puzzle13(filename)[0]
         self.width = get_coordinates_puzzle13(filename)[1]
         self.initial_player_location = get_coordinates_puzzle13(filename)[2]
         self.wall_coordinates = get_coordinates_puzzle13(filename)[3]
         self.player_location = get_coordinates_puzzle13(filename)[2]
         self.goal = get_coordinates_puzzle13(filename)[4]
-        self.final = []
+        self.shortest = []
         self.remember = []
         self.key = 0    
-        self.shortest = 0
-        self.longest = 0
-        self.discount = discount
-        self.learning_rate = learning_rate
-        self.greedy = greedy
+        self.discount =  0.9
+        self.learning_rate =  0.9
+        self.greedy = 0.9
         self.index = 0
-
+        self.paths = []
         self.Q = pd.DataFrame(columns=self.actions, dtype=np.float64)
-        # Creating Q-table for cells of the final route
         self.final_Q = pd.DataFrame(columns=self.actions, dtype=np.float64)
-        # change
-        self.first = True
-
+        self.steps = []
+        self.costs = []
 
     def move(self,action):
         state = self.player_location
-        if action == 'L': #up
+        if action == "Left": #up
             if (self.player_location[0], self.player_location[1]-1) not in self.wall_coordinates:
                 self.player_location = (self.player_location[0], self.player_location[1]-1)
-        elif action == 'R': #down
+        elif action == "Right": #down
             if (self.player_location[0], self.player_location[1]+1) not in self.wall_coordinates:
                 self.player_location = (self.player_location[0], self.player_location[1]+1)
-        elif action == 'U': #Left
+        elif action == "Up": #Left
             if  (self.player_location[0]-1, self.player_location[1]) not in self.wall_coordinates:
                 self.player_location = (self.player_location[0]-1, self.player_location[1])
-        elif action == 'D': #right
+        elif action == "Down": #right
             if (self.player_location[0]+1, self.player_location[1]) not in self.wall_coordinates:
                 self.player_location = (self.player_location[0]+1, self.player_location[1])
 
@@ -52,23 +46,12 @@ class puzzle13:
         self.index +=1
         new_state = self.player_location 
         
-        if( new_state == self.goal):
+        if new_state == self.goal:
             reward = 10
             win = True
-            #Muuuta!!!
-            if self.first == True:
-                self.final = self.remember
-                self.c = False
-                self.longest = len(self.remember)
-                self.shortest = len(self.remember)
-
-            if len(self.remember) < len(self.final):
-                # Saving the number of steps for the shortest route
-                self.shortest = len(self.remember)
-                # Clearing the dictionary for the final route
-                self.final = {}
-                # Reassigning the dictionary
-                self.final = self.remember
+            self.paths.append(self.remember)
+            if len(self.shortest)>len(self.remember) or len(self.shortest) == 0:
+                self.shortest = self.remember
             self.remember = []
         else:
             win = False
@@ -119,45 +102,34 @@ class puzzle13:
 
 
     def run_puzzle(self, n): #muuta
-        # Resulted list for the plotting Episodes via Steps
-        steps = []
-        # Summed costs for all episodes in resulted list
-        all_costs = []
-       
+ 
         for i in range(n):
             state = self.initial_player_location
             self.player_location = self.initial_player_location
-            print("uusi")
-            print(state)
-            print(self.goal)
             j = 0
 
             cost = 0
 
             running = True
-            while running:
-                
-                action = self.get_action(str(state))
-                print(action)
-                
+            while running:   
+                action = self.get_action(str(state))       
                 next_state, reward, win = self.move(action)
-                print(next_state)
                 cost += self.learn( str(state), action, reward,str(next_state))
 
                 state = next_state
 
-                i+=1
+                j+=1
 
                 if(win):
-                    steps += [i]
-                    all_costs += [cost]
+                    self.steps.append(i)
+                    self.costs.append(cost)
                     running = False
 
 
 def main():
     puzzle = puzzle13("./puzzle_splitted3.txt")
-    puzzle.run_puzzle(300)
-    print(puzzle.final)
+    puzzle.run_puzzle(100)
+    print(puzzle.shortest)
 if __name__ == '__main__':
     # This code won't run if this file is imported.
     main()
