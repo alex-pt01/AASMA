@@ -10,8 +10,6 @@ from agent import Agent
 from consts import BLACK,RED,BLUE
 from functions import is_valid_value
 
-from QL2 import QL2
-from QL13 import QL13
 class game:
     
     box_in_dock_a1 = False
@@ -91,7 +89,7 @@ class game:
             print(row)
             if len(row) > x:
                 x = len(row)
-        return (x * 32, y * 32)
+        return (x * 32, y * 32 + 90)
 
     def get_matrix(self):
         return self.matrix
@@ -610,45 +608,45 @@ def get_key():
     else:
       pass
 
-def display_box(screen, message):
-  "Print a message in a box in the middle of the screen"
-  fontobject = pygame.font.Font(None,18)
-  pygame.draw.rect(screen, (0,0,0),
-                   ((screen.get_width() / 2) - 100,
-                    (screen.get_height() / 2) - 10,
-                    200,20), 0)
-  pygame.draw.rect(screen, (255,255,255),
-                   ((screen.get_width() / 2) - 102,
-                    (screen.get_height() / 2) - 12,
-                    204,24), 1)
-  if len(message) != 0:
-    screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
-  pygame.display.flip()
+
 
 def display_end(screen):
     message = "Level Completed"
     fontobject = pygame.font.Font(None,18)
     pygame.draw.rect(screen, (0,0,0),
                    ((screen.get_width() / 2) - 100,
-                    (screen.get_height() / 2) - 10,
+                    (screen.get_height() / 2) - 50,
                     200,20), 0)
     pygame.draw.rect(screen, (255,255,255),
                    ((screen.get_width() / 2) - 102,
                     (screen.get_height() / 2) - 12,
                     204,24), 1)
     screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
+                ((screen.get_width() / 2) - 60, (screen.get_height() / 2) - 90))
     pygame.display.flip()
 
-
+def display_box(screen, message):
+  "Print a message in a box in the middle of the screen"
+  fontobject = pygame.font.Font(None,18)
+  pygame.draw.rect(screen, (0,0,0),
+                   ((screen.get_width() / 2) - 100,
+                    (screen.get_height() / 2) - 10,
+                    450,30), 0)
+  pygame.draw.rect(screen, (255,255,255),
+                   ((screen.get_width() / 2) - 300,
+                    (screen.get_height() / 2) - 12,
+                    620,18), 1)
+  if len(message) != 0:
+    screen.blit(fontobject.render(message, 1, (255,255,255)),
+                ((screen.get_width() / 2) - 300, (screen.get_height() / 2) - 10))
+  pygame.display.flip()
 
 
 def ask(screen, question):
   "ask(screen, question) -> answer"
   pygame.font.init()
   current_string = []
-  display_box(screen, question + ": " + "".join(current_string)
+  display_box(screen, question + "  : " + "".join(current_string)
 )
   while 1:
     inkey = get_key()
@@ -660,21 +658,21 @@ def ask(screen, question):
       current_string.append("_")
     elif inkey <= 127:
       current_string.append(chr(inkey))
-    display_box(screen, question + ": " + "".join(current_string)
+    display_box(screen, question + " >>  " + "".join(current_string)
 )
   return "".join(current_string)
 
 
-def start_game():
-    start = pygame.display.set_mode((320,240))
+def agentType():
+    start = pygame.display.set_mode((660,240))
 
     #game_option = ask(pygame.display.set_mode((320,1500)),"Game option: \nX: one agent\n Y: agent1 vs agent2\n Z: user vs agent2")
 
-    level = ask(start,"Select Level")
-    if int(level) > 0: # and (game_option=='X' or game_option=='Y' or game_option=='Z'):
-        return level #, game_option
+    agent_type = ask(start,"OPTION:  1) User Vs Random Agent  2) User Vs Q-Learning Agent   3) Q-Learning Agent  Vs  Random")
+    if int(agent_type) > 0 and int(agent_type)<=3: # and (game_option=='X' or game_option=='Y' or game_option=='Z'):
+        return agent_type #, game_option
     else:
-        print("ERROR: Invalid Level or game option: "+str(level))
+        print("ERROR: Invalid Level or game option: "+str(agent_type))
         sys.exit(2)
 
 
@@ -683,38 +681,33 @@ def start_game():
     
 dividing_wall = pygame.image.load('images/wall1.png')
 agent1 = pygame.image.load('images/agent1.png')
-
 wall = pygame.image.load('images/wall.png')
 floor = pygame.image.load('images/floor.png')
 box = pygame.image.load('images/bomx.png')
 box_right_place = pygame.image.load('images/box_docked.png')
 box_wrong_place = pygame.image.load('images/box_docked_wrong.png')
 agent = pygame.image.load('images/agent.png')
-
 agent_docked = pygame.image.load('images/agent_dock.png')
 agent1_docked = pygame.image.load('images/agent_dock1.png')
-
 docker = pygame.image.load('images/dock.png')
-
 num1 = pygame.image.load('images/n1.png')
 num2 = pygame.image.load('images/n2.png')
 num3 = pygame.image.load('images/n3.png')
 num4 = pygame.image.load('images/n4.png')
 num5 = pygame.image.load('images/n5.png')
-
 dock_num1 = pygame.image.load('images/dock_n1.png')
-dock_num2 = pygame.image.load('images/dock_n2.png')
-dock_num3 = pygame.image.load('images/dock_n3.png')
-dock_num4 = pygame.image.load('images/dock_n4.png')
-dock_num5 = pygame.image.load('images/dock_n5.png')
+dock_num2 = pygame.image.load('images/dock_n1.png')
+dock_num3 = pygame.image.load('images/dock_n1.png')
+dock_num4 = pygame.image.load('images/dock_n1.png')
+dock_num5 = pygame.image.load('images/dock_n1.png')
 finish = pygame.image.load('images/finish.png')
 
 
 background = 255, 226, 191
 pygame.init()
 
-level= start_game()
-game = game('levels',level)
+agent_type= agentType()
+game = game('levels',1) #level1
 size = game.load_size()
 screen = pygame.display.set_mode(size)
 steps_A1 = 0
@@ -729,25 +722,125 @@ while 1:
     if game.is_completed():
         game.reset()
         
+    #
+    clock = pygame.time.Clock()
+    #Initialise player scores
+    steps_A1 = 0
+    steps_A2 = 0
 
-        #SCORE
-        clock = pygame.time.Clock()
-        #Initialise player scores
-        steps_A1 = 0
-        steps_A2 = 0
     print_game(game.get_matrix(),screen)
-    
-    qLeaningPuzzle1 = QL13(game.get_matrix()[-5:len(game.get_matrix())])
-    allPahts = qLeaningPuzzle1.getAllPaths()
-    print(allPahts)
+    print("AGENT TYPE", agent_type)
+    if int(agent_type) ==1:
+        #Agent1 -> User input
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                #USER INPUT
+                #Agent1
+                if event.key == pygame.K_UP: game.move(0,-1, True, a1)
+                elif event.key == pygame.K_DOWN: game.move(0,1, True, a1)
+                elif event.key == pygame.K_LEFT: game.move(-1,0, True, a1)
+                elif event.key == pygame.K_RIGHT: game.move(1,0, True,  a1)
+        
+        #Agent2 -> Random
+        action = random.choice(a2.actions())	
+        if action == 'UP': 
+            game.move(0,-1, True, a2)
+            steps_A2 +=1
+        elif action == 'DOWN': 
+            game.move(0,1, True, a2)
+            steps_A2 +=1
+        elif action == 'LEFT': 
+            game.move(-1,0, True,  a2)
+            steps_A2 +=1
+        elif action == 'RIGHT': 
+            game.move(1,0, True,  a2)
+            steps_A2 +=1 
 
-    #forLoop
+    elif int(agent_type) ==2:
+        #Agent1 -> User input
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                #USER INPUT
+                #Agent1
+                if event.key == pygame.K_UP: game.move(0,-1, True, a1)
+                elif event.key == pygame.K_DOWN: game.move(0,1, True, a1)
+                elif event.key == pygame.K_LEFT: game.move(-1,0, True, a1)
+                elif event.key == pygame.K_RIGHT: game.move(1,0, True,  a1)
+        #Agent2 -> Q-Learning
+        #TODO
+
+    elif int(agent_type) ==3:
+        #Agent1 -> Random
+        action = random.choice(a1.actions())	
+        if action == 'UP': 
+            game.move(0,-1, True, a1)
+        
+            steps_A1 +=1
+        elif action == 'DOWN': 
+            game.move(0,1, True, a1)
+            steps_A1 +=1
+        elif action == 'LEFT': 
+            game.move(-1,0, True,  a1)
+            steps_A1 +=1
+        elif action == 'RIGHT': 
+            game.move(1,0, True,  a1)
+            steps_A1 +=1
+        #Agent2 -> Q-Learning
+        #TODO
+
+
+
+
+
+
+    #Display scores:
+    font = pygame.font.Font(None, 18)
+    #Agent1
+    text = font.render(str("Agent_1"), 1, BLUE)
+    screen.blit(text, (5,644)) 
+    text = font.render(str("Time"), 1, BLACK)
+    screen.blit(text, (60,644))   
+    text = font.render(str("Steps"), 1, BLACK)
+    screen.blit(text, (120,644)) 
+
+    text = font.render(str("Puzzle_1"), 1, BLACK)
+    screen.blit(text, (5,664)) 
+    text = font.render(str("Puzzle_2"), 1, BLACK)
+    screen.blit(text, (5,684)) 
+    text = font.render(str("Puzzle_3"), 1, BLACK)
+    screen.blit(text, (5,704)) 
+    #Agent2
+    text = font.render(str("Agent_2"), 1, RED)
+    screen.blit(text, (195,644)) 
+    text = font.render(str("Time"), 1, BLACK)
+    screen.blit(text, (250,644))   
+    text = font.render(str("Steps"), 1, BLACK)
+    screen.blit(text, (310,644)) 
+
+    text = font.render(str("Puzzle_1"), 1, BLACK)
+    screen.blit(text, (195,664)) 
+    text = font.render(str("Puzzle_2"), 1, BLACK)
+    screen.blit(text, (195,684)) 
+    text = font.render(str("Puzzle_3"), 1, BLACK)
+    screen.blit(text, (195,704)) 
+ 
+    # --- Go ahead and update the screen with what we've drawn.
+    pygame.display.flip()
+     
+    # --- Limit to 60 frames per second
+    clock.tick(60)
+    #-------------------------------------------------
+
+
+
+
 
 
     #RANDOM AGENT
     #Agent1
-   # action = random.choice(a1.actions())	
-    """ 
+    """     action = random.choice(a1.actions())	
     if action == 'UP': 
         game.move(0,-1, True, a1)
     
@@ -777,41 +870,7 @@ while 1:
         game.move(1,0, True,  a2)
         steps_A2 +=1 """
     
-    #SCORE-------------------------------------------------
-    #Draw the net
-    #pygame.draw.line(screen, BLACK, (60, 80), (130, 100), 1)
-
-    #Now let's draw all the sprites in one go. (For now we only have 2 sprites!)
-    all_sprites_list.draw(screen) 
- 
-    #Display scores:
-    font = pygame.font.Font(None, 22)
-    #Agents
-    text = font.render(str("Agent_1"), 1, BLUE)
-    screen.blit(text, (15,644))   
-    text = font.render(str("Agent_2"), 1, RED)
-    screen.blit(text, (15,667))  
-    #time
-    text = font.render(str("Time: "), 1, BLACK)
-    screen.blit(text, (100,644))   
-    text = font.render(str("Time: "), 1, BLACK)
-    screen.blit(text, (100,667))  
-    #steps
-    text = font.render(str("Steps: " +  str(steps_A1)), 1, BLACK)
-    screen.blit(text, (220,644))
-    text = font.render(str("Steps: " +  str(steps_A2)), 1, BLACK)
-    screen.blit(text, (220,667))
- 
-    # --- Go ahead and update the screen with what we've drawn.
-    pygame.display.flip()
-     
-    # --- Limit to 60 frames per second
-    clock.tick(60)
-    #-------------------------------------------------
-
-
-   # elif game_option == 'X':
-   #USER INPUT
+    #USER INPUT
     """
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit(0)

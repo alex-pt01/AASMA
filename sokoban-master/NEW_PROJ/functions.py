@@ -112,5 +112,8 @@ def get_coordinates_puzzle13(filename):
                 layout[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
 
         return rows,colsNum,initial_player_location, wall_coordinates, goal_coordinate 
+
+
+
         
 
