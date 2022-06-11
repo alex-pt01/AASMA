@@ -1,33 +1,28 @@
+from functions import box_is_deadlock
+
 class arena_QL2:
-    def __init__(self, box_coordinates_inp, player_location, storage_coordinates, wall_coordinates):
-        self.storage_coordinates = storage_coordinates
-        self.box_coordinates = frozenset(box_coordinates_inp)
-        self.player_location = player_location
-        self.wall_coordinates = wall_coordinates
+    def __init__(self, box_coords, agent_coords, docks_coords, wall_coords):
+        self.docks_coords = docks_coords
+        self.box_coords = frozenset(box_coords)
+        self.agent_coords = agent_coords
+        self.wall_coords = wall_coords
+        
     def __eq__(self, other):
         if type(other) is type(self):
-            return (self.box_coordinates, self.player_location) == (other.box_coordinates, other.player_location)
+            return (self.box_coords, self.agent_coords) == (other.box_coords, other.agent_coords)
         return False
-
-    def __hash__(self):
-        return hash((self.box_coordinates, self.player_location))
 
     def __repr__(self):
-        return str(self.box_coordinates) + " " + str(self.player_location)
+        return str(self.box_coords) + " " + str(self.agent_coords)
 
-    def boxes_not_in_destination(self):
-        return len(self.box_coordinates.difference(self.storage_coordinates))
+    def boxes_not_docked(self):
+        return len(self.box_coords.difference(self.docks_coords))
 
     def goal_reached(self):
-        return len(self.storage_coordinates.difference(self.box_coordinates)) == 0
+        return len(self.docks_coords.difference(self.box_coords)) == 0
     
-    def is_deadlock(self,box):
-        if box in self.storage_coordinates:
-            return False
-        for adjacent in [(-1, -1), (-1, +1), (+1, -1), (+1, +1)]:
-            if (box[0] + adjacent[0], box[1]) in self.wall_coordinates and (box[0], box[1] + adjacent[1]) in  self.wall_coordinates:
-                return True
-        return False
+    def box_is_stuck(self):
+        return any(map(lambda box: box_is_deadlock(box,self.docks_coords, self.wall_coords ), self.box_coords))
 
-    def is_stuck(self):
-        return any(map(lambda box: self.is_deadlock(box), self.box_coordinates))
+    def __hash__(self):
+        return hash((self.box_coords, self.agent_coords))

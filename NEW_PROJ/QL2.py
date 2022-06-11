@@ -1,14 +1,11 @@
-import random
-import time
-from collections import defaultdict
 from arena_QL2 import arena_QL2
 from agentArena_QL2 import agentArena_QL2
-from functions import get_coordinates_from_file
+from functions import manhattan_distance, get_coordinates_from_file, future_agent_box_coords
+import random
+import time
 
 start_time = time.time()
 random.seed(0)
-
-
 class QL2:
     def __init__(self,filename, actions = ["U", "D", "L", "R"],discount = 1.0,learning_rate =0.7 ):
         self.filename = filename
@@ -17,181 +14,150 @@ class QL2:
         self.learning_rate = learning_rate
         self.rows =  get_coordinates_from_file(filename)[0]
         self.cols = get_coordinates_from_file(filename)[1]
-        self.initial_player_location = get_coordinates_from_file(filename)[2]
-        self.wall_coordinates = get_coordinates_from_file(filename)[3]
-        self.box_coordinates = get_coordinates_from_file(filename)[4]
-        self.storage_coordinates = get_coordinates_from_file(filename)[5]
+        self.agent_coords = get_coordinates_from_file(filename)[2]
+        self.wall_coords = get_coordinates_from_file(filename)[3]
+        self.box_coords = get_coordinates_from_file(filename)[4]
+        self.docks_coords = get_coordinates_from_file(filename)[5]
         self.allPaths = []
 
 
-    def manhattan_distance(self,coordinates1, coordinates2):
-        return abs(coordinates1[0] - coordinates2[0]) + abs(coordinates1[1] - coordinates2[1])
+    #minimal distance from boxes to docks
+    def heuristic(self, boxes, docks):
+        heuristic = 0
+        boxes_not_in_dock = boxes.difference(docks)
+        empty_docks = docks.difference(boxes)
+        for box in boxes_not_in_dock:
+            min = 9999999
+            min_dock = None
+            for dock in empty_docks:
+                distance = manhattan_distance(box, dock)
+                if distance < min:
+                    min = distance
+                    min_dock = dock
+            heuristic += min
+            empty_docks.remove(min_dock)
+        return heuristic
 
-    def closeness_heuristic(self,boxes, storages):
-        ans = 0
-        boxes_not_in_storage = boxes.difference(storages)
-        empty_storages = storages.difference(boxes)
+    #minimal distance from agent to boxes
+    def distance_agent_boxes(self,box_coords, agent_coords):
+        min_distance = 9999999
+        for box in box_coords.difference(self.docks_coords):
+            min_distance = min(manhattan_distance(agent_coords, box), min_distance)
+        return min_distance
 
-        for box in boxes_not_in_storage:
-            minx = float('inf')
-            min_storage = None
-            for storage in empty_storages:
-                distance = self.manhattan_distance(box, storage)
-                if distance < minx:
-                    minx = distance
-                    min_storage = storage
-            ans += minx
-            empty_storages.remove(min_storage)
-
-        return ans
-        
-    def agent_to_box_min_distance(self,box_coordinates_inp, player_location):
-        minx = float("inf")
-        for box in box_coordinates_inp.difference(self.storage_coordinates):
-            minx = min(self.manhattan_distance(player_location, box), minx)
-        return minx
-
-
-    def get_next_player_and_box_location(self,action, current_location):
-        player_next_location = None
-        box_next_location_if_present = None
-        if action == 'U':
-            player_next_location = (current_location[0] - 1, current_location[1])
-            box_next_location_if_present = (current_location[0] - 2, current_location[1])
-        elif action == 'D':
-            player_next_location = (current_location[0] + 1, current_location[1])
-            box_next_location_if_present = (current_location[0] + 2, current_location[1])
-        elif action == 'R':
-            player_next_location = (current_location[0], current_location[1] + 1)
-            box_next_location_if_present = (current_location[0], current_location[1] + 2)
-        elif action == 'L':
-            player_next_location = (current_location[0], current_location[1] - 1)
-            box_next_location_if_present = (current_location[0], current_location[1] - 2)
-        return player_next_location, box_next_location_if_present
-
-
-    def check_if_move_is_invalid(self,player_location, action, box_coordinates_inp):
-        player_next_location, box_next_location_if_present = self.get_next_player_and_box_location(action, player_location)
-        return (player_next_location in self.wall_coordinates) \
-            or (player_next_location in box_coordinates_inp and box_next_location_if_present in box_coordinates_inp) \
-            or (player_next_location in box_coordinates_inp and box_next_location_if_present in self.wall_coordinates)
-
-
-    def get_all_possible_actions(self, player_location, box_coordinates_inp):
-        return [action for action in self.actions if not self.check_if_move_is_invalid(player_location, action,
-                                                                                box_coordinates_inp)]
-
-
-    def get_state_for_action(self,player_location, action, box_coordinates_inp):
-        targetLocation, targetNextLocation = self.get_next_player_and_box_location(action, player_location)
-        newLocation = targetLocation
-        newBoxCoordinates = set(box_coordinates_inp.copy())
-        if targetLocation in newBoxCoordinates:
-            newBoxCoordinates.remove(targetLocation)
-            newBoxCoordinates.add(targetNextLocation)
-        return arena_QL2(newBoxCoordinates, newLocation, self.storage_coordinates, self.wall_coordinates)
-
-
-
-
-
-
-    def get_max_QValue(self,sokoban_board, state, possible_actions):
-        max_qvalue = float("-inf")
-        max_action = None
-        for action in possible_actions:
-            if max_qvalue <= sokoban_board.get_QValue(state, action):
-                max_qvalue = sokoban_board.get_QValue(state, action)
-                max_action = action
-
-        return [max_qvalue, max_action]
-
-
-    def get_action_with_highest_qvalue(self,sokoban_board):
-        possible_actions = self.get_all_possible_actions(sokoban_board.current_state.player_location,
-                                                    sokoban_board.current_state.box_coordinates)
-        return self.get_max_QValue(sokoban_board, sokoban_board.current_state, possible_actions)[1]
-
-
-    def perform_valid_action(self, sokoban_board, action):
-        new_state = self.get_state_for_action(sokoban_board.current_state.player_location, action,
-                                        sokoban_board.current_state.box_coordinates)
-
-        R = -1
-
-        # Boxes closeness to the storage locations
-        step_difference = self.closeness_heuristic(new_state.box_coordinates, self.storage_coordinates) - \
-                        self.closeness_heuristic(sokoban_board.current_state.box_coordinates, self.storage_coordinates)
-        if step_difference < 0:
-            R += 3
-        elif step_difference > 0:
-            R += -3
-
-        # Move a box to storage
-        remaining_boxes_difference = new_state.boxes_not_in_destination() - \
-                                    sokoban_board.current_state.boxes_not_in_destination()
-        if remaining_boxes_difference < 0:
-            R += 15
-        elif remaining_boxes_difference > 0:
-            R += -10
-
-        # Player is close to box
-        distance_to_closest_box_difference = self.agent_to_box_min_distance(new_state.box_coordinates,
-                                                                    new_state.player_location) \
-                                            - self.agent_to_box_min_distance(sokoban_board.current_state.box_coordinates,
-                                                                        sokoban_board.current_state.player_location)
-        if distance_to_closest_box_difference < 0:
-            R += 1
-        elif distance_to_closest_box_difference > 0:
-            R += -1
-
-        current_q_value = sokoban_board.get_QValue(sokoban_board.current_state, action)
-        new_q_value = current_q_value + self.learning_rate * (
-                R + self.discount * self.get_max_QValue(sokoban_board, new_state,
-                                            self.get_all_possible_actions(new_state.player_location,
-                                                                    new_state.box_coordinates))[0]
-                - current_q_value)
-        sokoban_board.set_QValue(sokoban_board.current_state, action, new_q_value)
-        sokoban_board.current_state = new_state
-
-
-
-
-    def isSafe(idx, j, matrix):
-        if 0 <= idx <= len(matrix) and 0 <= j <= len(matrix[0]):
+    #verify if agent or box movement is valid
+    def invalid_step(self,agent_coords, action, box_coords):
+        future_agent_coords, box_next_location_if_present = future_agent_box_coords(action, agent_coords)
+        if future_agent_coords in self.wall_coords:
+            return True
+        elif future_agent_coords in box_coords and box_next_location_if_present in box_coords:
+            return True
+        elif future_agent_coords in box_coords and box_next_location_if_present in self.wall_coords:
             return True
         else:
             return False
 
+    #get all valid actions
+    def valid_actions(self, agent_coords, box_coords):
+        valid_actions= []
+        for action in self.actions:
+            if not self.invalid_step(agent_coords, action, box_coords):
+                valid_actions.append(action)
+        return valid_actions
+         
 
+    #get state in arena after an action
+    def action_state_effect(self,agent_coords, action, box_coords):
+        target_coords, target_agent_coords = future_agent_box_coords(action, agent_coords)
+        new_agent_coords = target_coords
+        new_boxes_coords = set(box_coords.copy())
+        if target_coords in new_boxes_coords:
+            new_boxes_coords.remove(target_coords)
+            new_boxes_coords.add(target_agent_coords)
+        return arena_QL2(new_boxes_coords, new_agent_coords, self.docks_coords, self.wall_coords)
 
+    #get list with max_qValue and the biggest possible action
+    def max_qValue(self,agent_arena, state, actions):
+        max_qvalue = float("-inf")
+        biggest_action = None
+        for action in actions: #all possible actions
+            if max_qvalue <= agent_arena.get_QValue(state, action):
+                biggest_action = action
+                max_qvalue = agent_arena.get_QValue(state, action)
+        return [max_qvalue, biggest_action]
 
+    #get action with highest qValue
+    def action_with_highest_qvalue(self,agent_arena):
+        actions = self.valid_actions(agent_arena.current_state.agent_coords, agent_arena.current_state.box_coords)
+        action_with_highest_qvalue = self.max_qValue(agent_arena, agent_arena.current_state, actions)[1]
+        return action_with_highest_qvalue
 
-    def run_an_episode_and_check_if_terminal(self,player_start_location_inp, max_moves_inp, epsilon_inp):
-        # Print path if this episode is terminal. Return true if terminal
-        sokoban_board = agentArena_QL2(self.box_coordinates, player_start_location_inp, self.storage_coordinates, self.wall_coordinates)
-        path = ""
+    def perform_valid_action(self, agent_arena, action):
+        #new state
+        new_state = self.action_state_effect(agent_arena.current_state.agent_coords, action, agent_arena.current_state.box_coords)
+        reward = -1
         
-        for _ in range(max_moves_inp):
+        #difference between boxes and docks
+        boxes_docks = self.heuristic(new_state.box_coords, self.docks_coords) - \
+                        self.heuristic(agent_arena.current_state.box_coords, self.docks_coords)
+        if boxes_docks < 0:
+            reward += 5
+        elif boxes_docks > 0:
+            reward += -5
+
+        #difference between new state boxes and current state boxes                       
+        boxes_difference = new_state.boxes_not_docked() - \
+                                    agent_arena.current_state.boxes_not_docked()
+        if boxes_difference < 0:
+            reward += 15
+        elif boxes_difference > 0:
+            reward += -10
+
+        #difference between agent and closest boxe
+        agent_box = self.distance_agent_boxes(new_state.box_coords,
+                                                                    new_state.agent_coords) \
+                                            - self.distance_agent_boxes(agent_arena.current_state.box_coords,
+                                                                        agent_arena.current_state.agent_coords)
+        if agent_box < 0:
+            reward += 1
+        elif agent_box > 0:
+            reward += -1
+
+        actual_qValue = agent_arena.get_QValue(agent_arena.current_state, action)
+        
+        #formula https://en.wikipedia.org/wiki/Q-learning
+        new_qValue = actual_qValue + self.learning_rate * (
+                reward + self.discount * self.max_qValue(agent_arena, new_state,
+                                            self.valid_actions(new_state.agent_coords,
+                                                                    new_state.box_coords))[0]
+                - actual_qValue)
+        agent_arena.set_QValue(agent_arena.current_state, action, new_qValue)
+        agent_arena.current_state = new_state
+
+
+    def check_terminal_episode(self,agent_coords, max_moves, epsilon_inp):
+        agent_arena = agentArena_QL2(self.box_coords, agent_coords, self.docks_coords, self.wall_coords)
+        path = ""
+        for _ in range(max_moves):
             if random.random() < epsilon_inp:
-                action = random.choice(self.get_all_possible_actions(sokoban_board.current_state.player_location,
-                                                                sokoban_board.current_state.box_coordinates))
+                action = random.choice(self.valid_actions(agent_arena.current_state.agent_coords,
+                                                                agent_arena.current_state.box_coords))
                 path += action
             else:
-                action = self.get_action_with_highest_qvalue(sokoban_board)
+                action = self.action_with_highest_qvalue(agent_arena)
                 path += action
-                print("PATH_ ", path)
                 self.allPaths.append(path)
-                self.perform_valid_action(sokoban_board, action)
-            if sokoban_board.current_state.goal_reached():
+                self.perform_valid_action(agent_arena, action)
+            if agent_arena.current_state.goal_reached():
                 print("Number of moves ", len(path))
                 self.steps = len(path)
                 print("Path is %%%%%%% ", path)
-                #allPaths.append(path)
 
                 return True
         return False
 
+
+    #VER
     def run(self):
         print(self.rows)
         rows = int(self.rows)
@@ -208,22 +174,22 @@ class QL2:
 
         # Run the algorithm
         for i in range(max_episodes):
-            episodeReachedTerminal= self.run_an_episode_and_check_if_terminal(self.initial_player_location, max_max_moves, epsilon_max)
+            episodeReachedTerminal= self.check_terminal_episode(self.agent_coords, max_max_moves, epsilon_max)
             
             if episodeReachedTerminal:
                 break
-            if i % 1000 == 0:
-                max_max_moves = max(int(max_max_moves * 0.9), min_max_moves)
-                epsilon_max = max(epsilon_max * 0.9, epsilon_min)
-                print("Max moves: ", max_max_moves)
-                print("current epsilon: ", epsilon_max)
-                print("Total Completed Episodes: ", i)
-                print("Qtable size: ", len(agentArena_QL2.qtable))
-                timeElapsed = time.time() - start_time
-                print('Time elapsed: ', timeElapsed)
-                if timeElapsed > 3600:
-                    print('Timeout')
-                    break
+      
+            max_max_moves = max(int(max_max_moves * 0.9), min_max_moves)
+            epsilon_max = max(epsilon_max * 0.9, epsilon_min)
+            print("Max moves: ", max_max_moves)
+            print("current epsilon: ", epsilon_max)
+            print("Total Completed Episodes: ", i)
+            print("Qtable size: ", len(agentArena_QL2.qtable))
+            timeElapsed = time.time() - start_time
+            print('Time elapsed: ', timeElapsed)
+            if timeElapsed > 3600:
+                print('Timeout')
+                break
 
         end = time.time()
         self.time = end - start_time

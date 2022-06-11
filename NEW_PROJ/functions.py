@@ -1,4 +1,4 @@
-#QL2 functions
+#QL2 functions ---------------------------------------------------------------------------------------
 def get_coordinates_from_file(filename):
     with open(filename, "r") as file:
         layout = file.readlines()
@@ -38,7 +38,43 @@ def get_coordinates_from_file(filename):
 
         return rows,colsNum,initial_player_location, wall_coordinates, box_coordinates, storage_coordinates
 
-#env functions
+def manhattan_distance(coords1, coords2):
+    return abs(coords1[0] - coords2[0]) + abs(coords1[1] - coords2[1])
+
+#effect of an action on the agent and the boxes
+def future_agent_box_coords(action, current_coords):
+    future_agent_coords = None
+    future_box_coords = None
+    if action == 'U':
+        future_agent_coords = (current_coords[0] - 1, current_coords[1])
+        future_box_coords = (current_coords[0] - 2, current_coords[1])
+    elif action == 'D':
+        future_agent_coords = (current_coords[0] + 1, current_coords[1])
+        future_box_coords = (current_coords[0] + 2, current_coords[1])
+    elif action == 'R':
+        future_agent_coords = (current_coords[0], current_coords[1] + 1)
+        future_box_coords = (current_coords[0], current_coords[1] + 2)
+    elif action == 'L':
+        future_agent_coords = (current_coords[0], current_coords[1] - 1)
+        future_box_coords = (current_coords[0], current_coords[1] - 2)
+    return future_agent_coords, future_box_coords    
+
+def box_is_deadlock(box,docks_coords, wall_coords ):
+    if box in docks_coords:
+        return False
+    for adjacent in [(-1, -1), (-1, +1), (+1, -1), (+1, +1)]:
+        if (box[0] + adjacent[0], box[1]) in wall_coords and (box[0], box[1] + adjacent[1]) in  wall_coords:
+            return True
+    return False
+
+
+
+
+
+
+
+
+#ENV functions ---------------------------------------------------------------------------------------
 def is_valid_value(char):
     if ( char == ' 'or #floor
         char == '#' or #wall
