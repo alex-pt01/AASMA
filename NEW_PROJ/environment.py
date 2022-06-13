@@ -9,6 +9,9 @@ from agent import Agent
 #from viewer import *
 from consts import BLACK,RED,BLUE
 from functions import is_valid_value
+from QL13 import puzzle13
+from QL2_new import puzzle2
+
 
 class game:
     
@@ -661,6 +664,12 @@ clock = pygame.time.Clock()
 all_sprites_list = pygame.sprite.Group()
 a1 = Agent(1)		
 a2 = Agent(2)
+p1 = True
+p2 = False
+p3 = False
+puzzle1 = puzzle13("./puzzle_splitted1.txt", (3, 1))
+puzzle_2= puzzle2("./puzzle_splited2.txt")
+puzzle_3 = puzzle13("./puzzle_splitted3.txt", (3, 1))
 while 1:
     if game.is_completed():
         game.reset()
@@ -739,6 +748,9 @@ while 1:
 
     elif int(agent_type) ==3:
         #Agent1 -> Random
+        #time.sleep(0.1)
+
+        '''
         action = random.choice(a1.actions())	
         if action == 'UP': 
             game.move(0,-1, True, a1)
@@ -752,10 +764,74 @@ while 1:
         elif action == 'RIGHT': 
             game.move(1,0, True,  a1)
             steps_A1 +=1
+         '''
         #Agent2 -> Q-Learning
         #TODO
+        #puzzle1
+        if p1:
+            print("p1")
+            action,win, cost =  puzzle1.run_one(0)
+            if action == 'UP': 
+                game.move(0,-1, True, a2)
+                steps_A2 +=1
+            elif action == 'DOWN': 
+                game.move(0,1, True, a2)
+                steps_A2 +=1
+            elif action == 'LEFT': 
+                game.move(-1,0, True,  a2)
+                steps_A2 +=1
+            elif action == 'RIGHT': 
+                game.move(1,0, True,  a2)
+                steps_A2 +=1
+            if win:
+                puzzle1.change_init_position( (3, 1))
+                p1 = False
+                p2 = True
+        
+        if p2:
+            action, win, cost, pos = puzzle_2.run_one(0)
+            print("p2")
+            if action == 'UP': 
+                game.move(0,-1, True, a2)
+                steps_A2 +=1
+            elif action == 'DOWN': 
+                game.move(0,1, True, a2)
+                steps_A2 +=1
+            elif action == 'LEFT': 
+                game.move(-1,0, True,  a2)
+                steps_A2 +=1
+            elif action == 'RIGHT': 
+                game.move(1,0, True,  a2)
+                steps_A2 +=1
+            if win:
+                p2 = False
+                p3 = True
+                puzzle_3.change_init_position((12,pos[1]))
+                puzzle_2.reset()
 
 
+        if p3:
+            print("p3")
+            action, win, cost = puzzle_3.run_one(0)
+            
+            if action == 'UP': 
+                game.move(0,-1, True, a2)
+                steps_A2 +=1
+            elif action == 'DOWN': 
+                game.move(0,1, True, a2)
+                steps_A2 +=1
+            elif action == 'LEFT': 
+                game.move(-1,0, True,  a2)
+                steps_A2 +=1
+            elif action == 'RIGHT': 
+                game.move(1,0, True,  a2)
+                steps_A2 +=1
+            if win:
+                p1 = True
+                p2 = False
+                p3 = False
+                print("VOITTO")
+                game.reset()
 
 
 
