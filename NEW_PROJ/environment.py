@@ -91,7 +91,7 @@ class game:
         for row in self.matrix:
             if len(row) > x:
                 x = len(row)
-        return (x * 32, y * 32 + 90)
+        return (x * 32, y * 32 + 120)
 
     def get_matrix(self):
         return self.matrix
@@ -652,14 +652,20 @@ finish = pygame.image.load('images/finish.png')
 background = 255, 226, 191
 pygame.init()
 
+
 agent_type= agentType()
 game = game('levels',1) #level1
 size = game.load_size()
 screen = pygame.display.set_mode(size)
-steps_A1 = 0
-steps_A2 = 0
-#agent actions
-#actions = ['DOWN', 'LEFT','UP','RIGHT']	
+steps_A1_p1 = 0
+steps_A1_p2 = 0
+steps_A1_p3 = 0
+steps_A2_p1 = 0
+steps_A2_p2 = 0
+steps_A2_p3 = 0
+time_A2_p1 = 0
+time_A2_p2 =0
+time_A2_p3=0
 clock = pygame.time.Clock()
 all_sprites_list = pygame.sprite.Group()
 a1 = Agent(1)		
@@ -750,60 +756,67 @@ while 1:
         #Agent1 -> Random
         #time.sleep(0.1)
 
-        '''
+        
         action = random.choice(a1.actions())	
         if action == 'UP': 
             game.move(0,-1, True, a1)
-            steps_A1 +=1
+            steps_A1_p1 +=1
         elif action == 'DOWN': 
             game.move(0,1, True, a1)
-            steps_A1 +=1
+            steps_A1_p1 +=1
         elif action == 'LEFT': 
             game.move(-1,0, True,  a1)
-            steps_A1 +=1
+            steps_A1_p1 +=1
         elif action == 'RIGHT': 
             game.move(1,0, True,  a1)
-            steps_A1 +=1
-         '''
+            steps_A1_p1 +=1
+         
         #Agent2 -> Q-Learning
-        #TODO
         #puzzle1
         if p1:
+            time1=time.time()
             print("p1")
             action,win, cost =  puzzle1.run_one(0)
+            print("COST", cost)
             if action == 'UP': 
                 game.move(0,-1, True, a2)
-                steps_A2 +=1
+                steps_A2_p1 +=1
             elif action == 'DOWN': 
                 game.move(0,1, True, a2)
-                steps_A2 +=1
+                steps_A2_p1 +=1
             elif action == 'LEFT': 
                 game.move(-1,0, True,  a2)
-                steps_A2 +=1
+                steps_A2_p1 +=1
             elif action == 'RIGHT': 
                 game.move(1,0, True,  a2)
-                steps_A2 +=1
+                steps_A2_p1 +=1
             if win:
+                time2=time.time()
+                time_A2_p1=time2-time1
+
                 puzzle1.change_init_position( (3, 1))
                 p1 = False
                 p2 = True
         
         if p2:
+            time1=time.time()
             action, win, cost, pos = puzzle_2.run_one(0)
-            print("p2")
+            #print("p2")
             if action == 'UP': 
                 game.move(0,-1, True, a2)
-                steps_A2 +=1
+                steps_A2_p2 +=1
             elif action == 'DOWN': 
                 game.move(0,1, True, a2)
-                steps_A2 +=1
+                steps_A2_p2 +=1
             elif action == 'LEFT': 
                 game.move(-1,0, True,  a2)
-                steps_A2 +=1
+                steps_A2_p2 +=1
             elif action == 'RIGHT': 
                 game.move(1,0, True,  a2)
-                steps_A2 +=1
+                steps_A2_p2 +=1
             if win:
+                time2=time.time()
+                time_A2_p2=time2-time1
                 p2 = False
                 p3 = True
                 puzzle_3.change_init_position((12,pos[1]))
@@ -811,34 +824,47 @@ while 1:
 
 
         if p3:
-            print("p3")
+            time1=time.time()
             action, win, cost = puzzle_3.run_one(0)
-            
             if action == 'UP': 
                 game.move(0,-1, True, a2)
-                steps_A2 +=1
+                steps_A2_p3 +=1
             elif action == 'DOWN': 
                 game.move(0,1, True, a2)
-                steps_A2 +=1
+                steps_A2_p3 +=1
             elif action == 'LEFT': 
                 game.move(-1,0, True,  a2)
-                steps_A2 +=1
+                steps_A2_p3 +=1
             elif action == 'RIGHT': 
                 game.move(1,0, True,  a2)
-                steps_A2 +=1
+                steps_A2_p3 +=1
             if win:
+                time2=time.time()
+                time_A2_p3=time2-time1
                 p1 = True
                 p2 = False
                 p3 = False
-                print("VOITTO")
+                steps_A2_p1= 0
+                steps_A2_p2= 0
+                steps_A2_p3 = 0
+                #print("VOITTO")
                 game.reset()
+                time_A2_p1 =0
+                time_A2_p2 = 0
+                time_A2_p3 = 0 
 
 
 
-
+    def time_convert(sec):
+        mins = sec // 60
+        sec = sec % 60
+        mins = mins % 60
+        mili = sec*1000
+        time_str = format(mili, ".4f")
+        return time_str
     #Display scores:
     font = pygame.font.Font(None, 18)
-    #Agent1
+    #Agent1 --------------------------------------
     text = font.render(str("Agent_1"), 1, BLUE)
     screen.blit(text, (5,644)) 
     text = font.render(str("Time"), 1, BLACK)
@@ -852,7 +878,28 @@ while 1:
     screen.blit(text, (5,684)) 
     text = font.render(str("Puzzle_3"), 1, BLACK)
     screen.blit(text, (5,704)) 
-    #Agent2
+    text = font.render(str("Total"), 1, BLACK)
+    screen.blit(text, (5,724))
+
+    #puzzle1 steps
+    text = font.render(str(steps_A1_p1), 1, BLACK)
+    screen.blit(text, (120,664)) 
+    #puzzle2 steps
+    text = font.render(str(steps_A1_p2), 1, BLACK)
+    screen.blit(text, (120,684)) 
+    #puzzle3 steps
+    text = font.render(str(steps_A1_p3), 1, BLACK)
+    screen.blit(text, (120,704)) 
+    #total steps
+    text = font.render(str(steps_A1_p1 + steps_A1_p2 +steps_A1_p3), 1, BLACK)
+    screen.blit(text, (120,724)) 
+
+    #puzzle2 time
+    #puzzle2 time
+    #puzzle3 time
+
+
+    #Agent2--------------------------------------
     text = font.render(str("Agent_2"), 1, RED)
     screen.blit(text, (195,644)) 
     text = font.render(str("Time"), 1, BLACK)
@@ -866,7 +913,35 @@ while 1:
     screen.blit(text, (195,684)) 
     text = font.render(str("Puzzle_3"), 1, BLACK)
     screen.blit(text, (195,704)) 
- 
+
+    #puzzle1 steps
+    text = font.render(str(steps_A2_p1), 1, BLACK)
+    screen.blit(text, (310,664)) 
+    #puzzle2 steps
+    text = font.render(str(steps_A2_p2), 1, BLACK)
+    screen.blit(text, (310,684)) 
+    #puzzle3 steps
+    text = font.render(str(steps_A2_p3), 1, BLACK)
+    screen.blit(text, (310,704)) 
+    #total steps
+    text = font.render(str("Total"), 1, BLACK)
+    screen.blit(text, (195,724)) 
+    text = font.render(str(steps_A2_p1 + steps_A2_p2 +steps_A2_p3), 1, BLACK)
+    screen.blit(text, (310,724)) 
+
+    #puzzle1 time
+    text = font.render(str(time_convert(time_A2_p1)), 1, BLACK)
+    screen.blit(text, (250,664)) 
+    #puzzle2 time
+    text = font.render(str(time_convert(time_A2_p2)), 1, BLACK)
+    screen.blit(text, (250,684)) 
+    #puzzle3 time
+    text = font.render(str(time_convert(time_A2_p3)), 1, BLACK)
+    screen.blit(text, (250,704)) 
+    #total time
+    text = font.render(str(format(time_A2_p1 + time_A2_p2 + time_A2_p3, ".4f")), 1, BLACK)
+    screen.blit(text, (250,724)) 
+
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
      
