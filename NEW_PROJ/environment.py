@@ -761,17 +761,21 @@ while 1:
                         p2_user = True
                         if flag_p1_A1 == False:
                             time_A1_p1_final = time.time() - time_A1_p1_init
+                            print("time_A1_p1_final ->->",time_A1_p1_final)
                             flag_p1_A1 = True
 
                 if p2_user:
                     #print("P2 --- ")
                     user_actions(pygame, game,a1)
                     steps_A1_p2 +=1
-                    box_1_pressed = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==13
-                    box_2_pressed = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==13
+                    box_1_pressed = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
+                    box_2_pressed = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
                     if box_1_pressed:
+                        print("OK1")
                         box_in_dock_1 = True
                     if box_2_pressed:
+                        print("OK2")
+
                         box_in_dock_2 = True
 
                     if game.agent_position(a1)[1] <=9:
@@ -782,7 +786,9 @@ while 1:
                         p2_user = False
                     if box_in_dock_1 and box_in_dock_2 :
                         if flag_p2_A1 == False:
+                            
                             time_A1_p2_final = time.time() - time_A1_p2_init
+                            print("time_A1_p2_final ->->",time_A1_p2_final)
                             flag_p2_A1 = True
 
                 if p3_user:
@@ -795,7 +801,7 @@ while 1:
 
                 
                     if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
-                        print("SSS")
+                        print("FLAG1")
                         p1_user = False
                         p2_user = False
                         p3_user = False
@@ -804,14 +810,22 @@ while 1:
                         print(":::::    ", time_A1_p3_final)
                         time_A1_p1_final = 0
                         time_A1_p2_final = 0
-                        
-                        win_ = True
-                        time.sleep(2)
-                    if win_:           
-                        game.reset()
-                        time_A1_p3_final = 0
+                        flag_p2_A1 = False
+                        flag_p1_A1 = False
+                        flag_p3_A1 = False
 
-        print("AGENT POSITION ", game.agent_position(a2))
+                        win_ = True
+                                             
+                        steps_A1_p1 = 0
+                        steps_A1_p2 = 0
+                        steps_A1_p3 = 0
+                        time_A1_p3_final = 0  
+                        time.sleep(2) 
+                        game.reset()
+        
+
+
+        #print("AGENT POSITION ", game.agent_position(a2))
         #Agent2 -> RANDOM
         action = random.choice(a2.actions())	
         if p1_random:
@@ -821,16 +835,16 @@ while 1:
             if game.agent_position(a2)[1] <16: # -> p2
                 p1_random = False
                 p2_random = True
-                if flag_p1_A1 == False:
-                    time_A2_p1_final = time.time() - time_A2_p2_init
+                if flag_p1_A2 == False:
+                    time_A2_p1_final = time.time() - time_A2_p1_init
                     flag_p1_A2 = True
                                 
         if p2_random:
             #print("P2 --- ")
             random_actions(pygame, game,a2,action)
             steps_A2_p2 +=1
-            box_1_pressed = game.agent_position(a2)[0] == 6 and game.agent_position(a2)[1] ==13
-            box_2_pressed = game.agent_position(a2)[0] == 9 and game.agent_position(a2)[1] ==13
+            box_1_pressed = game.agent_position(a2)[0] == 6 and game.agent_position(a2)[1] ==12
+            box_2_pressed = game.agent_position(a2)[0] == 9 and game.agent_position(a2)[1] ==12
             if box_1_pressed:
                 box_in_dock_1 = True
             if box_2_pressed:
@@ -856,20 +870,26 @@ while 1:
                 p2_random = True
                 p3_random = False
             if game.agent_position(a2)[0] == 2 and game.agent_position(a2)[1] ==8:
+                print("FLAG2")
+
                 p1_random = False
                 p2_random = False
                 p3_random = False
+                flag_p2_A2 = False
+                flag_p1_A2 = False
+                flag_p3_A2 = False
 
                 time_A2_p3_final = time.time() - time_A2_p3_init #DONT SHOW TIME #TODO
                 print(":::::    ", time_A2_p3_final)
                 time_A2_p1_final = 0
                 time_A2_p2_final = 0
-                
-                win_ = True
+            
+                steps_A2_p1 = 0
+                steps_A2_p2 = 0
+                steps_A2_p3 = 0
+                time_A2_p3_final = 0 
                 time.sleep(2)
-            if win_:           
                 game.reset()
-                time_A2_p3_final = 0
         
 
 
