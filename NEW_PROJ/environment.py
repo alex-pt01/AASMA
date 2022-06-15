@@ -234,7 +234,7 @@ class game:
 
                 
     def reset(self):
-        time.sleep(2) 
+        
 
         self.box_in_dock_a1 = False
         self.box_in_dock_a2 = False
@@ -759,7 +759,7 @@ while 1:
             if event.type == pygame.QUIT: sys.exit(0)
             elif event.type == pygame.KEYDOWN:
                 print("AGENT POSITION ", game.agent_position(a1))
-        
+
                 steps_A1 +=1 
                 
                 user_actions(pygame, game, a1)
@@ -797,21 +797,27 @@ while 1:
                 if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
                     #steps
                     final_steps_A1_p3 = steps_A1 
-                    #time                    
-                    time_A1_p1_final = 0
-                    time_A1_p2_final = 0
+
                     time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
+                    print("time_A1_p3_final ", time_A1_p3_final)
+                    time.sleep(1)
+                   
+                    #time                    
+                    #time_A1_p1_final = 0
+                    #time_A1_p2_final = 0
                     #flags
                     flag_p2_A1 = False
                     flag_p1_A1 = False
                     flag_p3_A1 = False
                     #steps                             
-                    final_steps_A1_p1 = 0
-                    final_steps_A1_p2 = 0
-                    final_steps_A1_p3 = 0
+                    #final_steps_A1_p1 = 0
+                    #final_steps_A1_p2 = 0
+                    #final_steps_A1_p3 = 0                    
+                    #game.reset() 
+                    #final_steps_A1_p3 = 0   
+                    time_A1_p3_final = 0         
+
                     
-                    time.sleep(2)
-                    game.reset()          
 
         
         
@@ -841,7 +847,6 @@ while 1:
                 box_in_dock_2_A2 = True
             
             if box_in_dock_1_A2 and box_in_dock_2_A2 :
-                print("OK.")
                 #time
                 if flag_p2_A2 == False:
                     time_A2_p2_final = time.time() - time_A2_p2_init
@@ -869,7 +874,7 @@ while 1:
                 final_steps_A2_p2 = 0
                 final_steps_A2_p3 = 0
                 
-                time.sleep(2)
+                
                 game.reset()   
 
         
@@ -884,69 +889,7 @@ while 1:
     #USER vs Q-Learning -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==2: 
         #Agent1 -> User input
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
-                if p1_user:
-                    #print("P1 --- ")
-                    user_actions(pygame, game, a1)
-                    steps_A1_p1 +=1
-                    #if game.agent_position(a1)[0] == 3 and game.agent_position(a1)[1] ==17: #button pressed
-                    #    time_A1_p1_final = time.time() - time_A1_p1_init
-                    if game.agent_position(a1)[1] <16: # -> p2
-                        p1_user = False
-                        p2_user = True
-                        if flag_p1_A1 == False:
-                            time_A1_p1_final = time.time() - time_A1_p1_init
-                            flag_p1_A1 = True
-
-                if p2_user:
-                    #print("P2 --- ")
-                    user_actions(pygame, game,a1)
-                    steps_A1_p2 +=1
-                    box_1_pressed = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==13
-                    box_2_pressed = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==13
-                    if box_1_pressed:
-                        box_in_dock_1 = True
-                    if box_2_pressed:
-                        box_in_dock_2 = True
-
-                    if game.agent_position(a1)[1] <=9:
-                        p3_user = True
-                        p2_user = False
-                    if game.agent_position(a1)[1] >= 15:
-                        p1_user = True
-                        p2_user = False
-                    if box_in_dock_1 and box_in_dock_2 :
-                        if flag_p2_A1 == False:
-                            time_A1_p2_final = time.time() - time_A1_p2_init
-                            flag_p2_A1 = True
-
-                if p3_user:
-                    #print("P3 --- ")
-                    user_actions(pygame, game,a1)
-                    steps_A1_p3 +=1
-                    if game.agent_position(a1)[1] >=6:
-                        p2_random_or_user = True
-                        p3_random_or_user = False
-
-                
-                    if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
-                        print("SSS")
-                        p1_user = False
-                        p2_user = False
-                        p3_user = False
-
-                        time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
-                        print(":::::    ", time_A1_p3_final)
-                        time_A1_p1_final = 0
-                        time_A1_p2_final = 0
-                        
-                        win_ = True
-                        time.sleep(2)
-                    if win_:           
-                        game.reset()
-                        time_A1_p3_final = 0
+        
 
 
 
@@ -1029,63 +972,6 @@ while 1:
     #RANDOM vs Q-Learning -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==3:
         #Agent1 -> Random
-        action = random.choice(a1.actions())	
-        if p1_random:
-            #print("P1 --- ")
-            random_actions(pygame, game, a1,action)
-            steps_A1_p1 +=1
-            if game.agent_position(a1)[1] <16: # -> p2
-                p1_random = False
-                p2_random = True
-                if flag_p1_A1 == False:
-                    time_A1_p1_final = time.time() - time_A1_p2_init
-                    flag_p1_A1 = True
-                                
-        if p2_random:
-            #print("P2 --- ")
-            random_actions(pygame, game,a1,action)
-            steps_A1_p2 +=1
-            box_1_pressed = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==13
-            box_2_pressed = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==13
-            if box_1_pressed:
-                box_in_dock_1 = True
-            if box_2_pressed:
-                box_in_dock_2 = True
-
-            if  game.agent_position(a1)[1] <=9:
-                p3_random = True
-                p2_random = False
-            if game.agent_position(a1)[1] >= 15:
-                p1_random = True
-                p2_random = False
-            if box_in_dock_1 and box_in_dock_2 :
-                if flag_p2_A1 == False:
-                    time_A1_p2_final = time.time() - time_A1_p2_init
-                    flag_p2_A1 = True
-
-        if p3_random:
-            #print("P3 --- ")
-            random_actions(pygame, game,a1,action)
-            steps_A1_p3 +=1
-            if game.agent_position(a1)[1] >=6:
-                p2_random = True
-                p3_random = False
-            if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==8:
-                p1_random = False
-                p2_random = False
-                p3_random = False
-
-                time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
-                print(":::::    ", time_A1_p3_final)
-                time_A1_p1_final = 0
-                time_A1_p2_final = 0
-                
-                win_ = True
-                time.sleep(2)
-            if win_:           
-                game.reset()
-                time_A1_p3_final = 0
-         
 
 
 
