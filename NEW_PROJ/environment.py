@@ -771,10 +771,11 @@ win_A1 = False
 win_A2 = False
 
 a1_done = False
-
 a2_done = False
 
-while 1:
+number_of_rounds = 300
+i = 0
+while i < number_of_rounds:
     if game.is_completed():
         game.reset()
         
@@ -942,6 +943,7 @@ while 1:
                     #steps_A2_p1 +=1
                 if win:
                     stepsA1p1.append(steps_A1_p1)
+                    steps_A1_p1 = 0
                     time_A2_p1_final = time.time() - time_A2_p1_init
                     puzzle1_DQN.change_init_position( (np.float32(3), np.float32(1)))
                     p1_DQN = False
@@ -965,6 +967,7 @@ while 1:
                     #steps_A2_p1 +=1
                 if win:
                     stepsA1p2.append(steps_A1_p2)
+                    steps_A1_p2 = 0
                     time_A2_p2_final = time.time() - time_A2_p2_init
                     p2_DQN = False
                     p3_DQN = True
@@ -990,6 +993,7 @@ while 1:
                     #steps_A2_p1 +=1
                 if win:
                     stepsA1p3.append(steps_A1_p3)
+                    steps_A1_p3 = 0
                     a1_done = True
                     time_A2_p3_final = time.time() - time_A2_p3_init
                     p1_DQN = True
@@ -1026,7 +1030,8 @@ while 1:
                     game.move(1,0, True,  a2)
                     #steps_A2_p1 +=1
                 if win:
-                    stepsA2p3.append(steps_A2_p1)
+                    stepsA2p1.append(steps_A2_p1)
+                    steps_A2_p1 = 0
                     time_A2_p1_final = time.time() - time_A2_p1_init
                     puzzle1.change_init_position( (3, 1))
                     p1 = False
@@ -1049,7 +1054,8 @@ while 1:
                     game.move(1,0, True,  a2)
                     # steps_A2_p2 +=1
                 if win:
-                    stepsA2p3.append(steps_A2_p2)
+                    stepsA2p2.append(steps_A2_p2)
+                    steps_A2_p2 = 0
                     time_A2_p2_final = time.time() - time_A2_p2_init
                     p2 = False
                     p3 = True
@@ -1074,7 +1080,8 @@ while 1:
                     game.move(1,0, True,  a2)
                     # steps_A2_p3 +=1
                 if win:
-                    stepsA2p3.append(steps_A1_p3)
+                    stepsA2p3.append(steps_A2_p3)
+                    steps_A2_p3 = 0
                     a2_done = True
                     time_A2_p3_final = time.time() - time_A2_p3_init
                     p1 = True
@@ -1089,26 +1096,9 @@ while 1:
                     time_A2_p2_final = 0
                     time_A2_p3_final = 0    
         if a1_done and a2_done:
+            i+=1
             stepsA1.append(steps_A1)
             stepsA2.append(steps_A2)
-            fig1 = plt.figure(figsize =(5, 4)) 
-            plt.plot(stepsA1, c = 'b')
-            plt.plot(stepsA2,  c = 'r')
-            plt.legend(["Agent 1", "Agent 2"])
-            plt.title("Steps per round")
-            plt.ylabel("Steps")
-            plt.xlabel("Rounds")
-            plt.show(block=False)
-            plt.pause(.1)
-            fig2 = plt.figure(figsize =(5, 4)) 
-            plt.plot(stepsA1p1, c = 'b')
-            plt.plot(stepsA1p1,  c = 'r')
-            plt.legend(["Agent 1", "Agent 2"])
-            plt.title("Steps per round puzzle1")
-            plt.ylabel("Steps")
-            plt.xlabel("Rounds")
-            plt.show(block=False)
-            plt.pause(.1)
             steps_A2 = 0
             steps_A1 = 0
             a1_done = False
@@ -1258,16 +1248,6 @@ while 1:
 
 
 
-
-
-
-
-
-
-
-
-
-
     #STATISTICS------------------------------------------------------------------------------------------------------------------------
     def time_convert(time): #miliseconds
         return int(time*1000)
@@ -1388,3 +1368,45 @@ while 1:
 
 
     pygame.display.update()
+
+
+
+#plots results
+fig1 = plt.figure(figsize =(5, 4)) 
+plt.plot(stepsA1, c = 'b')
+plt.plot(stepsA2,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Steps per round")
+plt.ylabel("Steps")
+plt.xlabel("Rounds")
+fig2 = plt.figure(figsize =(5, 4)) 
+plt.plot(stepsA1p1, c = 'b')
+plt.plot(stepsA2p1,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Steps per round puzzle1")
+plt.ylabel("Steps")
+plt.xlabel("Rounds")
+fig3 = plt.figure(figsize =(5, 4)) 
+plt.plot(stepsA1p2, c = 'b')
+plt.plot(stepsA2p2,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Steps per round puzzle2")
+plt.ylabel("Steps")
+plt.xlabel("Rounds")
+fig4 = plt.figure(figsize =(5, 4)) 
+plt.plot(stepsA1p3, c = 'b')
+plt.plot(stepsA2p3,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Steps per round puzzle3")
+plt.ylabel("Steps")
+plt.xlabel("Rounds")
+
+
+
+
+    
+
+
+
+
+
