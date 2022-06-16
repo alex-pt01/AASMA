@@ -10,7 +10,7 @@ from agent import Agent
 from consts import BLACK,RED,BLUE
 from functions import is_valid_value
 from QL13 import puzzle13
-from QL2_new import puzzle2
+from QL2 import puzzle2
 from DQN13 import DQNAgent13
 from DQN2 import DQNAgent2
 import matplotlib.pyplot as plt
@@ -801,6 +801,8 @@ costa2 = 0
 number_of_rounds = 200
 i = 0
 while i < number_of_rounds:
+    print("round")
+    print(i+1)
     if game.is_completed():
         game.reset()
         
@@ -868,7 +870,7 @@ while i < number_of_rounds:
     
         #Agent2 -> Q-Learning
         if p1:
-            print("p1")
+
             action,win, costa2 =  puzzle1.run_one(0)
             print("COST", cost)
             if action == 'UP': 
@@ -1213,9 +1215,9 @@ while i < number_of_rounds:
 
         #Agent2 -> Q-Learning
         if p1:
-            print("p1")
+        
             action,win, cost =  puzzle1.run_one(0)
-            print("COST", cost)
+    
             if action == 'UP': 
                 game.move(0,-1, True, a2)
                 steps_A2_p1 +=1

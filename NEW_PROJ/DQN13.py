@@ -83,8 +83,6 @@ class DQNAgent13:
       
 
 
-        #self.initial_player_location = get_coordinates_puzzle13(filename)[2]
-
     def store_transition(self, state, action, reward, next_state, done):
         index = self.mem_cntr % self.mem_size
         self.state_memory[index] = state
@@ -197,7 +195,7 @@ class DQNAgent13:
                     'average_score %.2f' % avg_score,
                     'epsilon %.2f' % self.epsilon)
 
-        #x = [i+1 for i in range(n)]
+        
 
 
     def run_one(self,c):
@@ -219,10 +217,8 @@ class DQNAgent13:
         self.last_distance = manhattan_distance(pos,self.goal)
 
 def main():
-    #def __init__(self,filename, input_dims, batch_size, gamma, epsilon, num_actions,
-    # max_mem_size = 100000, eps_end=0.01, eps_dec=5e-4, discount = 1.0,learning_rate =0.7):
     dq = DQNAgent13("./puzzle_splitted3.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
                   input_dims=[2], lr=0.001)
 if __name__ == '__main__':
-    # This code won't run if this file is imported.
+   
     main()

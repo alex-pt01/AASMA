@@ -1,76 +1,3 @@
-#QL2 functions ---------------------------------------------------------------------------------------
-def get_coordinates_from_file(filename):
-    with open(filename, "r") as file:
-        layout = file.readlines()
-        layout = [x.replace('\n','') for x in layout]
-        layout = [','.join(layout[i]) for i in range(len(layout))]
-        layout = [x.split(',') for x in layout]
-        maxColsNum = max([len(x) for x in layout])
-        wall_coordinates = set()
-        box_coordinates = set()
-        storage_coordinates = set()
-        #agent_button = set()
-        #end_flag = set()
-
-        initial_player_location = (0,0)
-        rows = 0
-
-        for irow in range(len(layout)):
-            rows +=1
-            for icol in range(len(layout[irow])):
-
-                if layout[irow][icol] == '#':
-                    wall_coordinates.add((irow,icol)) # wall
-                elif layout[irow][icol] == '.' or layout[irow][icol] == 'd' or layout[irow][icol] == 'b' or layout[irow][icol] == 'e': 
-                    storage_coordinates.add((irow,icol))#storage
-                elif layout[irow][icol] == '$' or layout[irow][icol] == '2' or layout[irow][icol] == '4' or layout[irow][icol] == '5': 
-                    box_coordinates.add((irow,icol))  # box
-                elif layout[irow][icol] == '@': 
-                    initial_player_location = (irow,icol)  #agent
-                #elif layout[irow][icol] == '.': 
-                #    agent_button = (irow,icol)  #agent
-                #elif layout[irow][icol] == 'z': 
-                #    end_flag = (irow,icol)  #agent
-            colsNum = len(layout[irow])
-            #print("colsNum" ,colsNum)
-            if colsNum < maxColsNum:
-                layout[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
-
-        return rows,colsNum,initial_player_location, wall_coordinates, box_coordinates, storage_coordinates
-
-def manhattan_distance(coords1, coords2):
-    return abs(coords1[0] - coords2[0]) + abs(coords1[1] - coords2[1])
-
-#effect of an action on the agent and the boxes
-def future_agent_box_coords(action, current_coords):
-    future_agent_coords = None
-    future_box_coords = None
-    if action == 'U':
-        future_agent_coords = (current_coords[0] - 1, current_coords[1])
-        future_box_coords = (current_coords[0] - 2, current_coords[1])
-    elif action == 'D':
-        future_agent_coords = (current_coords[0] + 1, current_coords[1])
-        future_box_coords = (current_coords[0] + 2, current_coords[1])
-    elif action == 'R':
-        future_agent_coords = (current_coords[0], current_coords[1] + 1)
-        future_box_coords = (current_coords[0], current_coords[1] + 2)
-    elif action == 'L':
-        future_agent_coords = (current_coords[0], current_coords[1] - 1)
-        future_box_coords = (current_coords[0], current_coords[1] - 2)
-    return future_agent_coords, future_box_coords    
-
-def box_is_deadlock(box,docks_coords, wall_coords ):
-    if box in docks_coords:
-        return False
-    for adjacent in [(-1, -1), (-1, +1), (+1, -1), (+1, +1)]:
-        if (box[0] + adjacent[0], box[1]) in wall_coords and (box[0], box[1] + adjacent[1]) in  wall_coords:
-            return True
-    return False
-
-
-
-
-
 
 
 
@@ -118,68 +45,66 @@ def is_valid_value(char):
 
 def get_coordinates_puzzle13(filename):
     with open(filename, "r") as file:
-        layout = file.readlines()
-        layout = [x.replace('\n','') for x in layout]
-        layout = [','.join(layout[i]) for i in range(len(layout))]
-        layout = [x.split(',') for x in layout]
-        maxColsNum = max([len(x) for x in layout])
+        map = file.readlines()
+        map = [x.replace('\n','') for x in map]
+        map = [','.join(map[i]) for i in range(len(map))]
+        map = [x.split(',') for x in map]
+        maxColsNum = max([len(x) for x in map])
         wall_coordinates = []
-
-        goal_coordinate = set()
-
-
+        goal = set()
         initial_player_location = (0,0)
         rows = 0
-
-        for irow in range(len(layout)):
+        for irow in range(len(map)):
             rows +=1
-            for icol in range(len(layout[irow])):
+            for icol in range(len(map[irow])):
 
-                if layout[irow][icol] == '#' or layout[irow][icol] == '*':
+                if map[irow][icol] == '#' or map[irow][icol] == '*':
                     wall_coordinates.append((irow,icol)) 
-                elif layout[irow][icol] == '.' or layout[irow][icol] == 'z':
-                    goal_coordinate = (irow,icol)
-                elif layout[irow][icol] == '@': 
+                elif map[irow][icol] == '.' or map[irow][icol] == 'z':
+                    goal = (irow,icol)
+                elif map[irow][icol] == '@': 
                     initial_player_location = (irow,icol) 
-            colsNum = len(layout[irow])
+            colsNum = len(map[irow])
 
             if colsNum < maxColsNum:
-                layout[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
+                map[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
 
-        return rows,colsNum,initial_player_location, wall_coordinates, goal_coordinate 
+        return rows,colsNum,initial_player_location, wall_coordinates, goal 
 
+
+
+def manhattan_distance(location1, location2):
+    return abs(location1[0] - location2[0]) + abs(location1[1] - location2[1])
 
 def get_coordinates_puzzle2(filename):
     with open(filename, "r") as file:
-        layout = file.readlines()
-        layout = [x.replace('\n','') for x in layout]
-        layout = [','.join(layout[i]) for i in range(len(layout))]
-        layout = [x.split(',') for x in layout]
-        maxColsNum = max([len(x) for x in layout])
+        map = file.readlines()
+        map = [x.replace('\n','') for x in map]
+        map = [','.join(map[i]) for i in range(len(map))]
+        map = [x.split(',') for x in map]
+        
+        maxColsNum = max([len(x) for x in map])
         wall_coordinates = []
         dock_coordinates = []
         box_coordinates = []
-   
-
         initial_player_location = (0,0)
         rows = 0
-
-        for irow in range(len(layout)):
+        for irow in range(len(map)):
             rows +=1
-            for icol in range(len(layout[irow])):
+            for icol in range(len(map[irow])):
 
-                if layout[irow][icol] == '#' or layout[irow][icol] == '*':
+                if map[irow][icol] == '#' or map[irow][icol] == '*':
                     wall_coordinates.append((irow,icol)) 
-                elif layout[irow][icol] == 'b':
+                elif map[irow][icol] == 'b':
                     box_coordinates.append((irow,icol)) 
-                elif layout[irow][icol] == 'd':
+                elif map[irow][icol] == 'd':
                     dock_coordinates.append((irow,icol)) 
-                elif layout[irow][icol] == '@': 
+                elif map[irow][icol] == '@': 
                     initial_player_location = (irow,icol) 
-            colsNum = len(layout[irow])
+            colsNum = len(map[irow])
 
             if colsNum < maxColsNum:
-                layout[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
+                map[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
 
         return rows,colsNum,initial_player_location, wall_coordinates, box_coordinates, dock_coordinates
 

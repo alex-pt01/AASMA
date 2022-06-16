@@ -60,14 +60,9 @@ class puzzle13:
 
 
     def get_action(self,state):
-        if state not in self.Q.index:#Muuta!!
-             self.Q = self.Q.append(
-                pd.Series(
-                    [0]*len(self.actions),
-                    index=self.Q.columns,
-                    name=state,
-                )
-            )
+        if state not in self.Q.index:
+            self.Q = self.Q.append( pd.Series( [0,0,0,0], index=self.Q.columns,name=state, ) )
+
 
         random = np.random.uniform()
         if self.greedy < random:
@@ -79,37 +74,28 @@ class puzzle13:
             return state_action.idxmax()
 
 
-    def learn(self, state, action, reward, next_state):#muuta koko paska
+    def learn(self, state, action, reward, next_state):
 
-        #Decrease epsilon so that actions become less random as the agent learns
-     
-
-        if next_state not in self.Q.index:#Muuta!!
-             self.Q = self.Q.append(
-                pd.Series(
-                    [0]*len(self.actions),
-                    index=self.Q.columns,
-                    name=next_state,
-                )
-            )
+        if next_state not in self.Q.index:
+             self.Q = self.Q.append( pd.Series( [0,0,0,0], index=self.Q.columns,name=next_state ) )
         prediction = self.Q.loc[state,action]
             
         if next_state == self.goal:
-            q_tar = reward
+            q = reward
         else:
-            q_tar = reward + self.discount * self.Q.loc[next_state, :].max() #Q lauseke
+            q = reward + self.discount * self.Q.loc[next_state, :].max() 
         
         if(self.greedy<self.eps_max):
             self.greedy+= self.eps_add
         else:
             self.greedy = self.eps_max
         
-        self.Q.loc[state,action] += self.learning_rate * (q_tar - prediction)
+        self.Q.loc[state,action] += self.learning_rate * (q - prediction)
         return self.Q.loc[state, action]
 
 
 
-    def run_puzzle(self, n): #muuta
+    def run_puzzle(self, n): 
  
         for i in range(n):
             state = self.initial_agent_location
