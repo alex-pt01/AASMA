@@ -743,6 +743,23 @@ steps_A2 = 0
 stepsA1 = []
 stepsA2 = []
 
+steps_A1_p1 = 0
+stepsA1p1 = []
+
+steps_A1_p2 = 0
+stepsA1p2 = []
+
+steps_A1_p3 = 0
+stepsA1p3 = []
+
+steps_A2_p1 = 0
+stepsA2p1 = []
+
+steps_A2_p2 = 0
+stepsA2p2 = []
+
+steps_A2_p3 = 0
+stepsA2p3 = []
 
 box_in_dock_1 = False
 box_in_dock_2 = False
@@ -752,6 +769,10 @@ box_in_dock_2_A2 = False
 
 win_A1 = False
 win_A2 = False
+
+a1_done = False
+
+a2_done = False
 
 while 1:
     if game.is_completed():
@@ -903,12 +924,13 @@ while 1:
             #Agent1 -> DQN
             steps_A1 += 1
             if p1_DQN:
-            
+                
                 action,win, cost =  puzzle1_DQN.run_one(0)
+                steps_A2_p1 +=1
                # print("COST", cost)
                 if action == 2: 
                     game.move(0,-1, True, a1)
-                    #steps_A2_p1 +=1
+                    # +=1
                 elif action == 3: 
                     game.move(0,1, True, a1)
                     #steps_A2_p1 +=1
@@ -919,13 +941,14 @@ while 1:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    stepsA1p1.append(steps_A1_p1)
                     time_A2_p1_final = time.time() - time_A2_p1_init
                     puzzle1_DQN.change_init_position( (np.float32(3), np.float32(1)))
                     p1_DQN = False
                     p2_DQN = True
             
             if p2_DQN:
-            
+                steps_A1_p2 +=1
                 action, win, cost, pos = puzzle2_DQN.run_one(0)
                 #print("p2")
                 if action == 2: 
@@ -941,6 +964,7 @@ while 1:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    stepsA1p2.append(steps_A1_p2)
                     time_A2_p2_final = time.time() - time_A2_p2_init
                     p2_DQN = False
                     p3_DQN = True
@@ -949,7 +973,7 @@ while 1:
 
 
             if p3_DQN:
-               
+                steps_A1_p3 +=1
                 time1=time.time()
                 action, win, cost = puzzle3_DQN.run_one(0)
                 if action == 2: 
@@ -965,11 +989,13 @@ while 1:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    stepsA1p3.append(steps_A1_p3)
                     a1_done = True
                     time_A2_p3_final = time.time() - time_A2_p3_init
                     p1_DQN = True
                     p2_DQN = False
                     p3_DQN = False
+                   
                     #steps_A2_p1= 0
                     #steps_A2_p2= 0
                     #steps_A2_p3 = 0
@@ -984,7 +1010,7 @@ while 1:
             steps_A2 +=1
           
             if p1:
-               
+                steps_A2_p1 +=1
                 action,win, cost =  puzzle1.run_one(0)
                 #print("COST", cost)
                 if action == 'UP': 
@@ -1000,12 +1026,14 @@ while 1:
                     game.move(1,0, True,  a2)
                     #steps_A2_p1 +=1
                 if win:
+                    stepsA2p3.append(steps_A2_p1)
                     time_A2_p1_final = time.time() - time_A2_p1_init
                     puzzle1.change_init_position( (3, 1))
                     p1 = False
                     p2 = True
             
             if p2:
+                steps_A2_p2 +=1
                 action, win, cost, pos = puzzle_2.run_one(0)
                 #print("p2")
                 if action == 'UP': 
@@ -1021,6 +1049,7 @@ while 1:
                     game.move(1,0, True,  a2)
                     # steps_A2_p2 +=1
                 if win:
+                    stepsA2p3.append(steps_A2_p2)
                     time_A2_p2_final = time.time() - time_A2_p2_init
                     p2 = False
                     p3 = True
@@ -1029,6 +1058,7 @@ while 1:
 
 
             if p3:
+                steps_A2_p3 +=1
                 time1=time.time()
                 action, win, cost = puzzle_3.run_one(0)
                 if action == 'UP': 
@@ -1044,6 +1074,7 @@ while 1:
                     game.move(1,0, True,  a2)
                     # steps_A2_p3 +=1
                 if win:
+                    stepsA2p3.append(steps_A1_p3)
                     a2_done = True
                     time_A2_p3_final = time.time() - time_A2_p3_init
                     p1 = True
@@ -1060,11 +1091,20 @@ while 1:
         if a1_done and a2_done:
             stepsA1.append(steps_A1)
             stepsA2.append(steps_A2)
-           
+            fig1 = plt.figure(figsize =(5, 4)) 
             plt.plot(stepsA1, c = 'b')
             plt.plot(stepsA2,  c = 'r')
             plt.legend(["Agent 1", "Agent 2"])
             plt.title("Steps per round")
+            plt.ylabel("Steps")
+            plt.xlabel("Rounds")
+            plt.show(block=False)
+            plt.pause(.1)
+            fig2 = plt.figure(figsize =(5, 4)) 
+            plt.plot(stepsA1p1, c = 'b')
+            plt.plot(stepsA1p1,  c = 'r')
+            plt.legend(["Agent 1", "Agent 2"])
+            plt.title("Steps per round puzzle1")
             plt.ylabel("Steps")
             plt.xlabel("Rounds")
             plt.show(block=False)
