@@ -673,12 +673,9 @@ p1_DQN = True
 p2_DQN = False
 p3_DQN = False
 
-puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
-                  input_dims=[2], lr=0.001)
-puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
-                  input_dims=[6], lr=0.001)
-puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
-                  input_dims=[2], lr=0.001)
+puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4,input_dims=[2], lr=0.001)
+puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[6], lr=0.001)
+puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[2], lr=0.001)
 
 
 """
