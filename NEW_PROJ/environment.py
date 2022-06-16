@@ -11,8 +11,8 @@ from consts import BLACK,RED,BLUE
 from functions import is_valid_value
 from QL13 import puzzle13
 from QL2_new import puzzle2
-from DQN13 import DQNAgent13
-from DQN2 import DQNAgent2
+#from DQN13 import DQNAgent13
+#from DQN2 import DQNAgent2
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -673,9 +673,9 @@ p1_DQN = True
 p2_DQN = False
 p3_DQN = False
 
-puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4,input_dims=[2], lr=0.001)
-puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[6], lr=0.001)
-puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[2], lr=0.001)
+#puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4,input_dims=[2], lr=0.001)
+#puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[6], lr=0.001)
+#puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[2], lr=0.001)
 
 
 """
@@ -766,6 +766,8 @@ box_in_dock_2 = False
 
 box_in_dock_1_A2 = False
 box_in_dock_2_A2 = False
+box_in_dock_1_A1 = False
+box_in_dock_2_A1= False
 
 win_A1 = False
 win_A2 = False
@@ -773,7 +775,7 @@ win_A2 = False
 a1_done = False
 a2_done = False
 
-number_of_rounds = 300
+number_of_rounds = 3000
 i = 0
 while i < number_of_rounds:
     if game.is_completed():
@@ -804,12 +806,17 @@ while i < number_of_rounds:
                 flag_steps_A1_p1 = True
 
             #time and steps puzzle2
-            box_1_pressed_A1 = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
-            box_2_pressed_A1 = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
+
+            box_1_pressed_A1 = game.get_matrix()[11][1] == '*'
+            box_2_pressed_A1 = game.get_matrix()[11][4] == '*'
+
             if box_1_pressed_A1:
+                print("OK1")
                 box_in_dock_1_A1 = True
-            if box_2_pressed_A1:
+            if box_2_pressed_A1: 
                 box_in_dock_2_A1 = True
+                print("OK2")
+
             
             if box_in_dock_1_A1 and box_in_dock_2_A1 :
                 #time
@@ -917,7 +924,7 @@ while i < number_of_rounds:
                 time_A2_p3_final = 0          
         
 
-    
+    """
     #DQN vs Q-Learning -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==2: 
         #Agent1 -> User input
@@ -1242,7 +1249,7 @@ while i < number_of_rounds:
                 time_A2_p2_final = 0
                 time_A2_p3_final = 0    
         
-
+    """ 
 
 
 
@@ -1269,8 +1276,8 @@ while i < number_of_rounds:
     screen.blit(text, (5,684)) 
     text = font.render(str("Puzzle3"), 1, BLACK)
     screen.blit(text, (5,704)) 
-    text = font.render(str("Total"), 1, BLACK)
-    screen.blit(text, (5,724))
+    #text = font.render(str("Total"), 1, BLACK)
+    #screen.blit(text, (5,724))
 
     #puzzle1 steps
     text = font.render(str(final_steps_A1_p1), 1, BLACK)
@@ -1283,12 +1290,12 @@ while i < number_of_rounds:
     screen.blit(text, (120,704)) 
 
     #total steps
-    if final_steps_A1_p3 != final_steps_A1_p1 + final_steps_A1_p2 + final_steps_A1_p3:
-        text = font.render(str(final_steps_A1_p3), 1, BLACK)
-        screen.blit(text, (120,724)) 
-    else:
-        text = font.render(str(final_steps_A1_p1 + final_steps_A1_p2 + final_steps_A1_p3), 1, BLACK)
-        screen.blit(text, (120,724)) 
+    #if final_steps_A1_p3 != final_steps_A1_p1 + final_steps_A1_p2 + final_steps_A1_p3:
+    #    text = font.render(str(final_steps_A1_p3), 1, BLACK)
+    #    screen.blit(text, (120,724)) 
+    #else:
+    #    text = font.render(str(final_steps_A1_p1 + final_steps_A1_p2 + final_steps_A1_p3), 1, BLACK)
+    #    screen.blit(text, (120,724)) 
 
 
     #puzzle1 time
@@ -1334,12 +1341,12 @@ while i < number_of_rounds:
 
 
     #total steps
-    if final_steps_A2_p3 != final_steps_A2_p1 + final_steps_A2_p2 + final_steps_A2_p3:
-        text = font.render(str(final_steps_A2_p3), 1, BLACK)
-        screen.blit(text, (310,724)) 
-    else:
-        text = font.render(str(final_steps_A2_p1 + final_steps_A2_p2 + final_steps_A2_p3), 1, BLACK)
-        screen.blit(text, (310,724)) 
+    #if final_steps_A2_p3 != final_steps_A2_p1 + final_steps_A2_p2 + final_steps_A2_p3:
+    #    text = font.render(str(final_steps_A2_p3), 1, BLACK)
+    #    screen.blit(text, (310,724)) 
+    #else:
+    #    text = font.render(str(final_steps_A2_p1 + final_steps_A2_p2 + final_steps_A2_p3), 1, BLACK)
+    #    screen.blit(text, (310,724)) 
         
     #puzzle1 time
     text = font.render(str(time_convert(time_A2_p1_final)), 1, BLACK)
