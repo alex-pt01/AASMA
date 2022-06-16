@@ -11,8 +11,8 @@ from consts import BLACK,RED,BLUE
 from functions import is_valid_value
 from QL13 import puzzle13
 from QL2_new import puzzle2
-#from DQN13 import DQNAgent13
-#from DQN2 import DQNAgent2
+from DQN13 import DQNAgent13
+from DQN2 import DQNAgent2
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -793,7 +793,8 @@ while i < number_of_rounds:
         action = random.choice(a1.actions())	
         random_actions(pygame, game, a1,action)
         steps_A1 +=1
-        
+  
+
         #time and steps puzzle1
         if game.agent_position(a1)[1] <16: # -> p2
             #time
@@ -849,25 +850,24 @@ while i < number_of_rounds:
 
     
         #Agent2 -> Q-Learning
+        steps_A2 +=1
         if p1:
             print("p1")
             action,win, cost =  puzzle1.run_one(0)
             print("COST", cost)
             if action == 'UP': 
                 game.move(0,-1, True, a2)
-                steps_A2_p1 +=1
             elif action == 'DOWN': 
                 game.move(0,1, True, a2)
-                steps_A2_p1 +=1
             elif action == 'LEFT': 
                 game.move(-1,0, True,  a2)
-                steps_A2_p1 +=1
             elif action == 'RIGHT': 
                 game.move(1,0, True,  a2)
-                steps_A2_p1 +=1
             if win:
                 time_A2_p1_final = time.time() - time_A2_p1_init
                 puzzle1.change_init_position( (3, 1))
+                final_steps_A2_p1 = steps_A2
+                
                 p1 = False
                 p2 = True
         
@@ -892,6 +892,8 @@ while i < number_of_rounds:
                 p3 = True
                 puzzle_3.change_init_position((12,pos[1]))
                 puzzle_2.reset()
+                final_steps_A2_p2 = steps_A2
+
 
 
         if p3:
@@ -910,6 +912,8 @@ while i < number_of_rounds:
                 game.move(1,0, True,  a2)
                 steps_A2_p3 +=1
             if win:
+                final_steps_A2_p3 = steps_A2
+
                 time_A2_p3_final = time.time() - time_A2_p3_init
                 p1 = True
                 p2 = False
@@ -919,35 +923,30 @@ while i < number_of_rounds:
                 steps_A2_p3 = 0
                 game.reset()
 
-                time_A2_p1_final = 0
-                time_A2_p2_final = 0
-                time_A2_p3_final = 0          
+                #time_A2_p1_final = 0
+                #time_A2_p2_final = 0
+                #time_A2_p3_final = 0          
         
 
-    """
+    
     #DQN vs Q-Learning -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==2: 
         #Agent1 -> User input
+        steps_A1 +=1
         if not a1_done:
             #Agent1 -> DQN
             steps_A1 += 1
             if p1_DQN:
-                
                 action,win, cost =  puzzle1_DQN.run_one(0)
-                steps_A2_p1 +=1
                # print("COST", cost)
                 if action == 2: 
                     game.move(0,-1, True, a1)
-                    # +=1
                 elif action == 3: 
                     game.move(0,1, True, a1)
-                    #steps_A2_p1 +=1
                 elif action == 0: 
                     game.move(-1,0, True,  a1)
-                    # steps_A2_p1 +=1
                 elif action == 1: 
                     game.move(1,0, True,  a1)
-                    #steps_A2_p1 +=1
                 if win:
                     stepsA1p1.append(steps_A1_p1)
                     steps_A1_p1 = 0
@@ -955,6 +954,7 @@ while i < number_of_rounds:
                     puzzle1_DQN.change_init_position( (np.float32(3), np.float32(1)))
                     p1_DQN = False
                     p2_DQN = True
+                    final_steps_A1_p1 = steps_A1
             
             if p2_DQN:
                 steps_A1_p2 +=1
@@ -980,6 +980,8 @@ while i < number_of_rounds:
                     p3_DQN = True
                     puzzle3_DQN.change_init_position((np.float32(12),np.float32(pos[1])))
                     puzzle2_DQN.reset()
+                    final_steps_A1_p2 = steps_A1
+
 
 
             if p3_DQN:
@@ -1006,6 +1008,8 @@ while i < number_of_rounds:
                     p1_DQN = True
                     p2_DQN = False
                     p3_DQN = False
+                    final_steps_A1_p3 = steps_A1
+
                    
                     #steps_A2_p1= 0
                     #steps_A2_p2= 0
@@ -1026,16 +1030,12 @@ while i < number_of_rounds:
                 #print("COST", cost)
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
-                    # steps_A2_p1 +=1
                 elif action == 'DOWN': 
                     game.move(0,1, True, a2)
-                    # steps_A2_p1 +=1
                 elif action == 'LEFT': 
                     game.move(-1,0, True,  a2)
-                    #steps_A2_p1 +=1
                 elif action == 'RIGHT': 
                     game.move(1,0, True,  a2)
-                    #steps_A2_p1 +=1
                 if win:
                     stepsA2p1.append(steps_A2_p1)
                     steps_A2_p1 = 0
@@ -1136,8 +1136,9 @@ while i < number_of_rounds:
                 flag_steps_A1_p1 = True
 
             #time and steps puzzle2
-            box_1_pressed_A1 = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
-            box_2_pressed_A1 = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
+            box_1_pressed_A1 = game.get_matrix()[11][1] == '*'
+            box_2_pressed_A1 = game.get_matrix()[11][4] == '*'
+
             if box_1_pressed_A1:
                 box_in_dock_1_A1 = True
             if box_2_pressed_A1:
@@ -1175,13 +1176,14 @@ while i < number_of_rounds:
 
 
         #Agent2 -> Q-Learning
+        steps_A2 +=1
+ 
         if p1:
             print("p1")
             action,win, cost =  puzzle1.run_one(0)
             print("COST", cost)
             if action == 'UP': 
                 game.move(0,-1, True, a2)
-                steps_A2_p1 +=1
             elif action == 'DOWN': 
                 game.move(0,1, True, a2)
                 steps_A2_p1 +=1
@@ -1194,6 +1196,8 @@ while i < number_of_rounds:
             if win:
                 time_A2_p1_final = time.time() - time_A2_p1_init
                 puzzle1.change_init_position( (3, 1))
+                final_steps_A2_p1 = steps_A2
+
                 p1 = False
                 p2 = True
         
@@ -1202,22 +1206,20 @@ while i < number_of_rounds:
             #print("p2")
             if action == 'UP': 
                 game.move(0,-1, True, a2)
-                steps_A2_p2 +=1
             elif action == 'DOWN': 
                 game.move(0,1, True, a2)
-                steps_A2_p2 +=1
             elif action == 'LEFT': 
                 game.move(-1,0, True,  a2)
-                steps_A2_p2 +=1
             elif action == 'RIGHT': 
                 game.move(1,0, True,  a2)
-                steps_A2_p2 +=1
             if win:
                 time_A2_p2_final = time.time() - time_A2_p2_init
                 p2 = False
                 p3 = True
                 puzzle_3.change_init_position((12,pos[1]))
                 puzzle_2.reset()
+                final_steps_A2_p2 = steps_A2
+
 
 
         if p3:
@@ -1225,16 +1227,12 @@ while i < number_of_rounds:
             action, win, cost = puzzle_3.run_one(0)
             if action == 'UP': 
                 game.move(0,-1, True, a2)
-                steps_A2_p3 +=1
             elif action == 'DOWN': 
                 game.move(0,1, True, a2)
-                steps_A2_p3 +=1
             elif action == 'LEFT': 
                 game.move(-1,0, True,  a2)
-                steps_A2_p3 +=1
             elif action == 'RIGHT': 
                 game.move(1,0, True,  a2)
-                steps_A2_p3 +=1
             if win:
                 time_A2_p3_final = time.time() - time_A2_p3_init
                 p1 = True
@@ -1244,12 +1242,12 @@ while i < number_of_rounds:
                 steps_A2_p2= 0
                 steps_A2_p3 = 0
                 game.reset()
+                final_steps_A2_p3 = steps_A2
 
-                time_A2_p1_final = 0
-                time_A2_p2_final = 0
-                time_A2_p3_final = 0    
+                #time_A2_p1_final = 0
+                #time_A2_p2_final = 0
+                #time_A2_p3_final = 0    
         
-    """ 
 
 
 
