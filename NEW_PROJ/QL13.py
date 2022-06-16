@@ -26,8 +26,8 @@ class puzzle13:
         self.final_Q = pd.DataFrame(columns=self.actions, dtype=np.float64)
         self.steps = []
         self.costs = []
-        self.eps_min = 0.01
-        self.eps_dec = 5e-4
+        self.eps_max = 0.99
+        self.eps_add = 5e-4
 
     def move(self,action):
         state = self.agent_location
@@ -101,12 +101,12 @@ class puzzle13:
             q_tar = reward
         else:
             q_tar = reward + self.discount * self.Q.loc[next_state, :].max() #Q lauseke
-        '''Does not work for some reason
-        if(self.greedy>self.eps_min):
-            self.greedy-= self.eps_dec
+        
+        if(self.greedy<self.eps_max):
+            self.greedy+= self.eps_add
         else:
-            self.greedy = self.eps_min
-        '''
+            self.greedy = self.eps_max
+        
         self.Q.loc[state,action] += self.learning_rate * (q_tar - prediction)
         return self.Q.loc[state, action]
 

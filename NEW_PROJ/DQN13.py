@@ -39,16 +39,15 @@ class DeepQNetwork(nn.Module):
 
         
 class DQNAgent13:
-    def __init__(self, filename, pos, gamma, epsilon, lr, input_dims, batch_size, n_actions,
-                 max_mem_size=100000, eps_end=0.05, eps_dec=5e-4):
+    def __init__(self, filename, pos, gamma, epsilon, lr, input_dims, batch_size, n_actions):
         self.filename = filename
         self.gamma = gamma
         self.epsilon = epsilon
-        self.eps_min = eps_end
-        self.eps_dec = eps_dec
+        self.eps_max = 0.99
+        self.eps_dec = 5e-4
         self.lr = lr
         self.action_space = [i for i in range(n_actions)]
-        self.mem_size = max_mem_size
+        self.mem_size = 100000
         self.batch_size = batch_size
         self.mem_cntr = 0
         self.iter_cntr = 0
@@ -80,8 +79,7 @@ class DQNAgent13:
         self.paths = []
         self.steps = []
         self.costs = []
-        self.eps_min = 0.01
-        self.eps_dec = 5e-4
+      
 
 
         #self.initial_player_location = get_coordinates_puzzle13(filename)[2]
@@ -131,12 +129,12 @@ class DQNAgent13:
         loss = self.Q_eval.loss(q_target, q_eval).to(self.Q_eval.device)
         loss.backward()
         self.Q_eval.optimizer.step()
-        ''' does not work for some reason
-        if(self.epsilon>self.eps_min):
-            self.epsilon-= self.eps_dec
+        
+        if(self.epsilon<self.eps_max):
+            self.epsilon+= self.eps_add
         else:
-            self.epsilon = self.eps_min
-        '''
+            self.epsilon = self.eps_max
+        
 
     def move(self,action):
         state = self.observation
