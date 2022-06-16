@@ -11,7 +11,7 @@ import tensorflow as tf
 
 from functions import get_coordinates_puzzle2
 
-
+import time
 
 class DeepQNetwork(nn.Module):
     def __init__(self, lr, input_dims, fc1_dims, fc2_dims,
@@ -70,15 +70,15 @@ class DQNAgent2:
         self.wall_coordinates = get_coordinates_puzzle2(filename)[3]
         #self.agent_location =  self.initial_agent_location
         self.boxes = get_coordinates_puzzle2(filename)[4]
-        self.box1_location = get_coordinates_puzzle2(filename)[4][0]
-        self.box2_location = get_coordinates_puzzle2(filename)[4][1]
+        self.box1_location = (np.float32(get_coordinates_puzzle2(filename)[4][0][0]), np.float32(get_coordinates_puzzle2(filename)[4][0][1]))
+        self.box2_location = (np.float32(get_coordinates_puzzle2(filename)[4][1][0]), np.float32(get_coordinates_puzzle2(filename)[4][1][1]))
         #self.dock_location =  get_coordinates_puzzle2(filename)[5]
-        self.dock1 = get_coordinates_puzzle2(filename)[5][0]
-        self.dock2 = get_coordinates_puzzle2(filename)[5][1]
+        self.dock1 =(np.float32(get_coordinates_puzzle2(filename)[5][0][0]), np.float32(get_coordinates_puzzle2(filename)[5][0][1]))
+        self.dock2 = (np.float32(get_coordinates_puzzle2(filename)[5][1][0]), np.float32(get_coordinates_puzzle2(filename)[5][1][1]))
         self.init_walls = get_coordinates_puzzle2(filename)[3]
         self.init_box =  get_coordinates_puzzle2(filename)[4]
-        self.init_box1_location = get_coordinates_puzzle2(filename)[4][0]
-        self.init_box2_location = get_coordinates_puzzle2(filename)[4][1]
+        self.init_box1_location = (np.float32(get_coordinates_puzzle2(filename)[4][0][0]), np.float32(get_coordinates_puzzle2(filename)[4][0][1]))
+        self.init_box2_location =  (np.float32(get_coordinates_puzzle2(filename)[4][1][0]), np.float32(get_coordinates_puzzle2(filename)[4][1][1]))
         self.box1_in_dock = 0
         self.box2_in_dock = 0
         self.shortest = []
@@ -98,7 +98,6 @@ class DQNAgent2:
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation]).to(self.Q_eval.device)
-            print(state)
             actions = self.Q_eval.forward(state)
             action = torch.argmax(actions).item()
         else:
@@ -132,47 +131,47 @@ class DQNAgent2:
         loss.backward()
         self.Q_eval.optimizer.step()
 
+
+        ''' does not work for some reason
         if(self.epsilon>self.eps_min):
             self.epsilon-= self.eps_dec
         else:
             self.epsilon = self.eps_min
+        '''
 
 
     def move(self,action):
             reward = -0.1
-            print(action)
-            print("vali1")
-            print(self.box1_location)
-            print(self.dock1)
-            print("vali2")
-            print(self.box2_location)
-            print(self.dock2)
+            pos = (self.observation[0], self.observation[1])
             if action ==0: 
                 if (self.observation[0], self.observation[1]-1) not in self.wall_coordinates and (self.observation[0], self.observation[1]-1) != self.box1_location and (self.observation[0], self.observation[1]-1) != self.box2_location:
-                    self.observation = (self.observation[0], self.observation[1]-1)
+                    pos = (self.observation[0], self.observation[1]-1)
             elif action == 1: 
                 if (self.observation[0], self.observation[1]+1) not in self.wall_coordinates and  (self.observation[0], self.observation[1]+1) != self.box1_location and (self.observation[0], self.observation[1]+1) != self.box2_location:
-                    self.observation = (self.observation[0], self.observation[1]+1)
+                    pos = (self.observation[0], self.observation[1]+1)
             elif action == 2: 
                 if  (self.observation[0]-1, self.observation[1]) not in self.wall_coordinates and (self.observation[0]-1, self.observation[1]) != self.box1_location and (self.observation[0]-1, self.observation[1]) != self.box2_location:
-                    self.observation = (self.observation[0]-1, self.observation[1])
-
+              
+                    pos = (self.observation[0]-1, self.observation[1])
+                   
+          
                 elif((self.observation[0]-1, self.observation[1]) == self.box1_location and self.box1_location[0] >3):
-                    print("push1")
-                
+                 
+               
                     reward = 0.5
-                    self.observation = (self.observation[0]-1, self.observation[1])
+                    pos = (self.observation[0]-1, self.observation[1])
                     self.box1_location = (self.box1_location[0]-1, self.box1_location[1])
                     if self.box1_location == self.dock1:
                         self.box1_in_dock = 1
                         self.reward = 5
+                    
                         #self.wall_coordinates.append(self.box1_location)
                 
                 elif((self.observation[0]-1, self.observation[1]) == self.box2_location and self.box2_location[0] >3):
-                    print("push2")
+                 
                 
                     reward = 0.5
-                    self.observation = (self.observation[0]-1, self.observation[1])
+                    pos = (self.observation[0]-1, self.observation[1])
                     self.box2_location = (self.box2_location[0]-1, self.box2_location[1])
                     if self.box2_location == self.dock2:
                         self.box2_in_dock = 1
@@ -181,14 +180,14 @@ class DQNAgent2:
 
             elif action == 3: 
                 if (self.observation[0]+1, self.observation[1]) not in self.wall_coordinates and   (self.observation[0]+1, self.observation[1]) != self.box1_location and (self.observation[0]+1, self.observation[1]) != self.box2_location:
-                    self.observation = (self.observation[0]+1, self.observation[1])
+                    pos= (self.observation[0]+1.0, self.observation[1])
 
                 elif((self.observation[0]+1, self.observation[1]) == self.box1_location):
                     if(self.box1_location[0]+1 <= 6 and self.box1_in_dock != 1):
                     
                         reward = -1
                         self.box1_location = (self.box1_location[0]+1, self.box1_location[1])
-                        self.observation = (self.observation[0]+1, self.observation[1])
+                        pos = (self.observation[0]+1, self.observation[1])
 
 
                 elif((self.observation[0]+1, self.observation[1]) == self.box2_location):
@@ -196,11 +195,10 @@ class DQNAgent2:
                         
                         reward = -1
                         self.box2_location = (self.box2_location[0]+1, self.box2_location[1])
-                        self.observation = (self.observation[0]+1, self.observation[1])
+                        pos = (self.observation[0]+1, self.observation[1])
                         
-            new_state =  (np.float32(self.observation[0]),np.float32(self.observation[0]), np.float32(self.box1_location[0]),np.float32(self.box1_location[1]), np.float32(self.box2_location[0]), np.float32(self.box2_location[1]))
-            print(self.box1_in_dock)
-            print(self.box2_in_dock)
+            new_state =  (np.float32(pos[0]),np.float32(pos[1]), np.float32(self.box1_location[0]),np.float32(self.box1_location[1]), np.float32(self.box2_location[0]), np.float32(self.box2_location[1]))
+
             if self.box1_in_dock == 1 and self.box2_in_dock == 1:
 
                 reward = 10
@@ -221,7 +219,7 @@ class DQNAgent2:
             score = 0
             observation = get_coordinates_puzzle2(self.filename)[2]
             observation = (np.float32(self.observation[0]),np.float32(self.observation[0]), np.float32(self.box1_location[0]),np.float32(self.box1_location[1]), np.float32(self.box2_location[0]), np.float32(self.box2_location[1]))
-            print(observation)
+
             while not done:
                 action = self.choose_action(observation)
                 new_state, reward, done = self.move(action)
@@ -265,7 +263,6 @@ def main():
     dq = DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
                   input_dims=[6], lr=0.001)
     dq.run_puzzle(1)
-    print(dq.final)
 if __name__ == '__main__':
     # This code won't run if this file is imported.
     main()

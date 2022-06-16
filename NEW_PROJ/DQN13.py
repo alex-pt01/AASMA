@@ -99,7 +99,6 @@ class DQNAgent13:
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation]).to(self.Q_eval.device)
-            print(state)
             actions = self.Q_eval.forward(state)
             action = torch.argmax(actions).item()
         else:
@@ -132,12 +131,12 @@ class DQNAgent13:
         loss = self.Q_eval.loss(q_target, q_eval).to(self.Q_eval.device)
         loss.backward()
         self.Q_eval.optimizer.step()
-
+        ''' does not work for some reason
         if(self.epsilon>self.eps_min):
             self.epsilon-= self.eps_dec
         else:
             self.epsilon = self.eps_min
-
+        '''
 
     def move(self,action):
         state = self.observation
@@ -159,7 +158,6 @@ class DQNAgent13:
         new_state = (np.float32(self.observation[0]),np.float32(self.observation[1]))
    
         if new_state == self.goal:
-            print("QWQ")
             reward = 10
             win = True
             self.paths.append(self.remember)
@@ -203,8 +201,6 @@ class DQNAgent13:
         cost = c  
         action = self.choose_action(state)       
         next_state, reward, win = self.move(action)
-        print(self.goal)
-        print(next_state)
         self.store_transition(state, action, reward, next_state,win)
         self.observation = next_state
         state = next_state
@@ -221,7 +217,6 @@ def main():
     # max_mem_size = 100000, eps_end=0.01, eps_dec=5e-4, discount = 1.0,learning_rate =0.7):
     dq = DQNAgent13("./puzzle_splitted3.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
                   input_dims=[2], lr=0.001)
-    print(dq.run_one(0))
 if __name__ == '__main__':
     # This code won't run if this file is imported.
     main()

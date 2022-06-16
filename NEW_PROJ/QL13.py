@@ -101,7 +101,7 @@ class puzzle13:
             q_tar = reward
         else:
             q_tar = reward + self.discount * self.Q.loc[next_state, :].max() #Q lauseke
-        '''
+        '''Does not work for some reason
         if(self.greedy>self.eps_min):
             self.greedy-= self.eps_dec
         else:
@@ -159,6 +159,9 @@ def main():
     puzzle = puzzle13("./puzzle_splitted3.txt", (12, 4))
     puzzle.run_puzzle(100)
     print(puzzle.shortest)
+    plt.plot(1,[29])
+    plt.plot(1,[50])
+    plt.show()
 if __name__ == '__main__':
     # This code won't run if this file is imported.
     main()

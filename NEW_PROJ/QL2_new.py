@@ -52,17 +52,8 @@ class puzzle2:
 
     def move(self,action):
         reward = -0.1
-        '''
-        print("vali1")
-        print(self.box1_location)
-        print(self.dock1)
-        '''
-        print("vali1")
-        print(self.box1_location)
-        print(self.dock1)
-        print("vali2")
-        print(self.box2_location)
-        print(self.dock2)
+
+
         if action == "LEFT": 
             if (self.agent_location[0], self.agent_location[1]-1) not in self.wall_coordinates and (self.agent_location[0], self.agent_location[1]-1) != self.box1_location and (self.agent_location[0], self.agent_location[1]-1) != self.box2_location:
                 self.agent_location = (self.agent_location[0], self.agent_location[1]-1)
@@ -74,7 +65,7 @@ class puzzle2:
                 self.agent_location = (self.agent_location[0]-1, self.agent_location[1])
 
             elif((self.agent_location[0]-1, self.agent_location[1]) == self.box1_location and self.box1_location[0] >3):
-                print("push1")
+           
              
                 reward = 0.5
                 self.agent_location = (self.agent_location[0]-1, self.agent_location[1])
@@ -85,7 +76,7 @@ class puzzle2:
                     #self.wall_coordinates.append(self.box1_location)
             
             elif((self.agent_location[0]-1, self.agent_location[1]) == self.box2_location and self.box2_location[0] >3):
-                print("push2")
+
              
                 reward = 0.5
                 self.agent_location = (self.agent_location[0]-1, self.agent_location[1])
@@ -118,8 +109,7 @@ class puzzle2:
         self.remember.append(action)
         self.index +=1
         new_state = (self.agent_location[0],self.agent_location[1], self.box1_in_dock,self.box2_in_dock)
-        print(self.box1_in_dock)
-        print(self.box2_in_dock)
+
         if self.box1_in_dock == 1 and self.box2_in_dock == 1:
     
           
@@ -201,8 +191,7 @@ class puzzle2:
             running = True
             while running:  
                
-                action = self.get_action(str(state))
-                print(action)       
+                action = self.get_action(str(state))     
                 next_state, reward, win = self.move(action)
                 cost += self.learn( str(state), action, reward,str(next_state))
 
@@ -218,8 +207,7 @@ class puzzle2:
     def run_one(self, c):
             state = self.agent_location   
             cost = c  
-            action = self.get_action(str(state))
-            print(self.box1_location)       
+            action = self.get_action(str(state))  
             next_state, reward, win = self.move(action)
             cost += self.learn( str(state), action, reward,str(next_state))
 
@@ -236,11 +224,7 @@ class puzzle2:
 def main():
     puzzle = puzzle2("./p_split2.txt")
     
-    print(puzzle.dock1)
-    print(puzzle.box1_location)
-    print(puzzle.dock2)
-    print(puzzle.box2_location)
-    print(puzzle.boxes)
+   
     #print(puzzle.shortest)
 if __name__ == '__main__':
     # This code won't run if this file is imported.
