@@ -235,7 +235,7 @@ class game:
                 
     def reset(self):
         
-
+        
         self.box_in_dock_a1 = False
         self.box_in_dock_a2 = False
         self.last_box = ''
@@ -245,6 +245,7 @@ class game:
 
 
         self.__init__('levels',1)
+        pygame.time.delay(2 * 1000)
 
 
 
@@ -741,6 +742,9 @@ box_in_dock_2 = False
 box_in_dock_1_A2 = False
 box_in_dock_2_A2 = False
 
+win_A1 = False
+win_A2 = False
+
 while 1:
     if game.is_completed():
         game.reset()
@@ -797,24 +801,24 @@ while 1:
                 if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
                     #steps
                     final_steps_A1_p3 = steps_A1 
-
                     time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
-                    print("time_A1_p3_final ", time_A1_p3_final)
-                    time.sleep(1)
-                   
+                    win_A1 = True
+
+                if win_A1:
+                    game.reset()
                     #time                    
-                    #time_A1_p1_final = 0
-                    #time_A1_p2_final = 0
+                    time_A1_p1_final = 0
+                    time_A1_p2_final = 0
                     #flags
                     flag_p2_A1 = False
                     flag_p1_A1 = False
                     flag_p3_A1 = False
                     #steps                             
-                    #final_steps_A1_p1 = 0
-                    #final_steps_A1_p2 = 0
-                    #final_steps_A1_p3 = 0                    
-                    #game.reset() 
-                    #final_steps_A1_p3 = 0   
+                    final_steps_A1_p1 = 0
+                    final_steps_A1_p2 = 0
+                    final_steps_A1_p3 = 0                    
+                     
+                    final_steps_A1_p3 = 0   
                     time_A1_p3_final = 0         
 
                     
