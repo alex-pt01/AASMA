@@ -758,220 +758,203 @@ while 1:
     #Initialise player scores
 
     print_game(game.get_matrix(),screen)
-    #USER vs RANDOM -----------------------------------------------------------------------------------------------------
+    
+    #RANDOM vs Q-Learning -----------------------------------------------------------------------------------------
     if int(agent_type) ==1:
-         
-        #Agent1 USER INPUT
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
-                print("AGENT POSITION ", game.agent_position(a1))
 
-                steps_A1 +=1 
-                
-                user_actions(pygame, game, a1)
-        
-                #time and steps puzzle1
-                if game.agent_position(a1)[1] <16: # -> p2
-                    #time
-                    if flag_p1_A1 == False:
-                        time_A1_p1_final = time.time() - time_A1_p1_init
-                        flag_p1_A1 = True
-                    #steps
-                    if flag_steps_A1_p1 == False:
-                        final_steps_A1_p1 = steps_A1
-                        flag_steps_A1_p1 = True
-
-                #time and steps puzzle2
-                box_1_pressed = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
-                box_2_pressed = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
-                if box_1_pressed:
-                    box_in_dock_1 = True
-                if box_2_pressed:
-                    box_in_dock_2 = True
-                
-                if box_in_dock_1 and box_in_dock_2 :
-                    #time
-                    if flag_p2_A1 == False:
-                        time_A1_p2_final = time.time() - time_A1_p2_init
-                        flag_p2_A1 = True
-                    #steps
-                    if flag_steps_A1_p2 == False:
-                        final_steps_A1_p2 = steps_A1
-                        flag_steps_A1_p2 = True
-
-                #time and steps puzzle3
-                if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
-                    #steps
-                    final_steps_A1_p3 = steps_A1 
-                    time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
-                    win_A1 = True
-
-                if win_A1:
-                    game.reset()
-                    #time                    
-                    time_A1_p1_final = 0
-                    time_A1_p2_final = 0
-                    #flags
-                    flag_p2_A1 = False
-                    flag_p1_A1 = False
-                    flag_p3_A1 = False
-                    #steps                             
-                    final_steps_A1_p1 = 0
-                    final_steps_A1_p2 = 0
-                    final_steps_A1_p3 = 0                    
-                     
-                    final_steps_A1_p3 = 0   
-                    time_A1_p3_final = 0         
-
-                    
-
-        
-        
-        #AGENTE 2 - RANDOM
-        action = random.choice(a2.actions())	
-        random_actions(pygame, game, a2,action)
-        steps_A2 +=1
+        #AGENTE 1 - RANDOM
+        action = random.choice(a1.actions())	
+        random_actions(pygame, game, a1,action)
+        steps_A1 +=1
         
         #time and steps puzzle1
-        if game.agent_position(a2)[1] <16: # -> p2
+        if game.agent_position(a1)[1] <16: # -> p2
             #time
-            if flag_p1_A2 == False:
-                time_A2_p1_final = time.time() - time_A2_p1_init
-                flag_p1_A2 = True
+            if flag_p1_A1 == False:
+                time_A1_p1_final = time.time() - time_A1_p1_init
+                flag_p1_A1 = True
             #steps
-            if flag_steps_A2_p1 == False:
-                final_steps_A2_p1 = steps_A2
-                flag_steps_A2_p1 = True
+            if flag_steps_A1_p1 == False:
+                final_steps_A1_p1 = steps_A1
+                flag_steps_A1_p1 = True
 
             #time and steps puzzle2
-            box_1_pressed_A2 = game.agent_position(a2)[0] == 6 and game.agent_position(a2)[1] ==13
-            box_2_pressed_A2 = game.agent_position(a2)[0] == 9 and game.agent_position(a2)[1] ==13
-            if box_1_pressed_A2:
-                box_in_dock_1_A2 = True
-            if box_2_pressed_A2:
-                box_in_dock_2_A2 = True
+            box_1_pressed_A1 = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
+            box_2_pressed_A1 = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
+            if box_1_pressed_A1:
+                box_in_dock_1_A1 = True
+            if box_2_pressed_A1:
+                box_in_dock_2_A1 = True
             
-            if box_in_dock_1_A2 and box_in_dock_2_A2 :
+            if box_in_dock_1_A1 and box_in_dock_2_A1 :
                 #time
-                if flag_p2_A2 == False:
-                    time_A2_p2_final = time.time() - time_A2_p2_init
-                    flag_p2_A2 = True
+                if flag_p2_A1 == False:
+                    time_A1_p2_final = time.time() - time_A1_p2_init
+                    flag_p2_A1 = True
                 #steps
-                if flag_steps_A2_p2 == False:
-                    final_steps_A2_p2 = steps_A2
-                    flag_steps_A2_p2 = True
+                if flag_steps_A1_p2 == False:
+                    final_steps_A1_p2 = steps_A1
+                    flag_steps_A1_p2 = True
+
 
             #time and steps puzzle3
-            if game.agent_position(a2)[0] == 2 and game.agent_position(a2)[1] ==8:
+            if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
                 #steps
-                final_steps_A2_p3 = steps_A2
+                final_steps_A1_p3 = steps_A1
                 #time                    
-                time_A2_p1_final = 0
-                time_A2_p2_final = 0
-                time_A2_p3_final = time.time() - time_A2_p3_init #DONT SHOW TIME #TODO
+                time_A1_p1_final = 0
+                time_A1_p2_final = 0
+                time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
                 #flags
-                flag_p2_A2 = False
-                flag_p1_A2 = False
-                flag_p3_A2 = False
+                flag_p2_A1 = False
+                flag_p1_A1 = False
+                flag_p3_A1 = False
                 #steps                             
-                final_steps_A2_p1 = 0
-                final_steps_A2_p2 = 0
-                final_steps_A2_p3 = 0
-                
-                
+                final_steps_A1_p1 = 0
+                final_steps_A1_p2 = 0
+                final_steps_A1_p3 = 0
                 game.reset()   
 
-        
-        
-        
     
+        #Agent2 -> Q-Learning
+        if p1:
+            print("p1")
+            action,win, cost =  puzzle1.run_one(0)
+            print("COST", cost)
+            if action == 'UP': 
+                game.move(0,-1, True, a2)
+                steps_A2_p1 +=1
+            elif action == 'DOWN': 
+                game.move(0,1, True, a2)
+                steps_A2_p1 +=1
+            elif action == 'LEFT': 
+                game.move(-1,0, True,  a2)
+                steps_A2_p1 +=1
+            elif action == 'RIGHT': 
+                game.move(1,0, True,  a2)
+                steps_A2_p1 +=1
+            if win:
+                time_A2_p1_final = time.time() - time_A2_p1_init
+                puzzle1.change_init_position( (3, 1))
+                p1 = False
+                p2 = True
+        
+        if p2:
+            action, win, cost, pos = puzzle_2.run_one(0)
+            #print("p2")
+            if action == 'UP': 
+                game.move(0,-1, True, a2)
+                steps_A2_p2 +=1
+            elif action == 'DOWN': 
+                game.move(0,1, True, a2)
+                steps_A2_p2 +=1
+            elif action == 'LEFT': 
+                game.move(-1,0, True,  a2)
+                steps_A2_p2 +=1
+            elif action == 'RIGHT': 
+                game.move(1,0, True,  a2)
+                steps_A2_p2 +=1
+            if win:
+                time_A2_p2_final = time.time() - time_A2_p2_init
+                p2 = False
+                p3 = True
+                puzzle_3.change_init_position((12,pos[1]))
+                puzzle_2.reset()
+
+
+        if p3:
+            time1=time.time()
+            action, win, cost = puzzle_3.run_one(0)
+            if action == 'UP': 
+                game.move(0,-1, True, a2)
+                steps_A2_p3 +=1
+            elif action == 'DOWN': 
+                game.move(0,1, True, a2)
+                steps_A2_p3 +=1
+            elif action == 'LEFT': 
+                game.move(-1,0, True,  a2)
+                steps_A2_p3 +=1
+            elif action == 'RIGHT': 
+                game.move(1,0, True,  a2)
+                steps_A2_p3 +=1
+            if win:
+                time_A2_p3_final = time.time() - time_A2_p3_init
+                p1 = True
+                p2 = False
+                p3 = False
+                steps_A2_p1= 0
+                steps_A2_p2= 0
+                steps_A2_p3 = 0
+                game.reset()
+
+                time_A2_p1_final = 0
+                time_A2_p2_final = 0
+                time_A2_p3_final = 0          
         
 
-
-
     
-    #USER vs DQN -----------------------------------------------------------------------------------------------------
+    #DQN vs Q-Learning -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==2: 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
-                print("AGENT POSITION ", game.agent_position(a1))
+        #Agent1 -> DQN
+        if p1_DQN:
+            print("p1")
+            action,win, cost =  puzzle1_DQN.run_one(0)
+            print("COST", cost)
+            if action == 2: 
+                game.move(0,-1, True, a1)
+                #steps_A2_p1 +=1
+            elif action == 3: 
+                game.move(0,1, True, a1)
+                #steps_A2_p1 +=1
+            elif action == 0: 
+                game.move(-1,0, True,  a1)
+               # steps_A2_p1 +=1
+            elif action == 1: 
+                game.move(1,0, True,  a1)
+                #steps_A2_p1 +=1
+            if win:
+                time_A1_p1_final = time.time() - time_A1_p1_init
+                puzzle1_DQN.change_init_position( (3, 1))
+                p1_DQN = False
+                p2_DQN = True
+        
+        if p2_DQN:
+            action, win, cost, pos = puzzle2_DQN.run_one(0)
+            #print("p2")
+            if action == 2: 
+                game.move(0,-1, True, a1)
+                #steps_A2_p1 +=1
+            elif action == 3: 
+                game.move(0,1, True, a1)
+                #steps_A2_p1 +=1
+            elif action == 0: 
+                game.move(-1,0, True,  a1)
+               # steps_A2_p1 +=1
+            elif action == 1: 
+                game.move(1,0, True,  a1)
+                #steps_A2_p1 +=1
+            if win:
+                time_A1_p2_final = time.time() - time_A1_p2_init
+                p2_DQN = False
+                p3_DQN = True
+                puzzle3_DQN.change_init_position((12,pos[1]))
+                puzzle2_DQN.reset()
 
-                steps_A1 +=1 
-        
-                user_actions(pygame, game, a1)
-        
-                #time and steps puzzle1
-                if game.agent_position(a1)[1] <16: # -> p2
-                    #time
-                    if flag_p1_A1 == False:
-                        time_A1_p1_final = time.time() - time_A1_p1_init
-                        flag_p1_A1 = True
-                    #steps
-                    if flag_steps_A1_p1 == False:
-                        final_steps_A1_p1 = steps_A1
-                        flag_steps_A1_p1 = True
 
-                #time and steps puzzle2
-                box_1_pressed = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
-                box_2_pressed = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
-                if box_1_pressed:
-                    box_in_dock_1 = True
-                if box_2_pressed:
-                    box_in_dock_2 = True
-                
-                if box_in_dock_1 and box_in_dock_2 :
-                    #time
-                    if flag_p2_A1 == False:
-                        time_A1_p2_final = time.time() - time_A1_p2_init
-                        flag_p2_A1 = True
-                    #steps
-                    if flag_steps_A1_p2 == False:
-                        final_steps_A1_p2 = steps_A1
-                        flag_steps_A1_p2 = True
-
-                #time and steps puzzle3
-                if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
-                    #steps
-                    final_steps_A1_p3 = steps_A1 
-                    time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
-                    win_A1 = True
-
-                if win_A1:
-                    game.reset()
-                    #time                    
-                    time_A1_p1_final = 0
-                    time_A1_p2_final = 0
-                    #flags
-                    flag_p2_A1 = False
-                    flag_p1_A1 = False
-                    flag_p3_A1 = False
-                    #steps                             
-                    final_steps_A1_p1 = 0
-                    final_steps_A1_p2 = 0
-                    final_steps_A1_p3 = 0                    
-                     
-                    final_steps_A1_p3 = 0   
-                    time_A1_p3_final = 0    
-        
-        
-        
-        #Agent2 -> DQN
         if p3_DQN:
             time1=time.time()
             action, win, cost = puzzle3_DQN.run_one(0)
             if action == 2: 
-                game.move(0,-1, True, a2)
+                game.move(0,-1, True, a1)
                 #steps_A2_p1 +=1
             elif action == 3: 
-                game.move(0,1, True, a2)
+                game.move(0,1, True, a1)
                 #steps_A2_p1 +=1
             elif action == 0: 
-                game.move(-1,0, True,  a2)
+                game.move(-1,0, True,  a1)
                # steps_A2_p1 +=1
             elif action == 1: 
-                game.move(1,0, True,  a2)
+                game.move(1,0, True,  a1)
                 #steps_A2_p1 +=1
             if win:
                 time_A2_p3_final = time.time() - time_A2_p3_init
@@ -1064,12 +1047,66 @@ while 1:
                 time_A2_p2_final = 0
                 time_A2_p3_final = 0    
         
-     
+    
 
 
-    #RANDOM vs Q-Learning -----------------------------------------------------------------------------------------------------
+
+
+
+    #RANDOM vs DQN -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==3:
-        #Agent1 -> Random
+        #Agent1 -> RANDOM
+        action = random.choice(a1.actions())	
+        random_actions(pygame, game, a1,action)
+        steps_A1 +=1
+        
+        #time and steps puzzle1
+        if game.agent_position(a1)[1] <16: # -> p2
+            #time
+            if flag_p1_A1 == False:
+                time_A1_p1_final = time.time() - time_A1_p1_init
+                flag_p1_A1 = True
+            #steps
+            if flag_steps_A1_p1 == False:
+                final_steps_A1_p1 = steps_A1
+                flag_steps_A1_p1 = True
+
+            #time and steps puzzle2
+            box_1_pressed_A1 = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
+            box_2_pressed_A1 = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
+            if box_1_pressed_A1:
+                box_in_dock_1_A1 = True
+            if box_2_pressed_A1:
+                box_in_dock_2_A1 = True
+            
+            if box_in_dock_1_A1 and box_in_dock_2_A1 :
+                #time
+                if flag_p2_A1 == False:
+                    time_A1_p2_final = time.time() - time_A1_p2_init
+                    flag_p2_A1 = True
+                #steps
+                if flag_steps_A1_p2 == False:
+                    final_steps_A1_p2 = steps_A1
+                    flag_steps_A1_p2 = True
+
+
+            #time and steps puzzle3
+            if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
+                #steps
+                final_steps_A1_p3 = steps_A1
+                #time                    
+                time_A1_p1_final = 0
+                time_A1_p2_final = 0
+                time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
+                #flags
+                flag_p2_A1 = False
+                flag_p1_A1 = False
+                flag_p3_A1 = False
+                #steps                             
+                final_steps_A1_p1 = 0
+                final_steps_A1_p2 = 0
+                final_steps_A1_p3 = 0
+                game.reset()   
 
 
 
@@ -1147,9 +1184,12 @@ while 1:
                 time_A2_p1_final = 0
                 time_A2_p2_final = 0
                 time_A2_p3_final = 0    
-
-    
         
+
+
+
+
+
 
 
 
