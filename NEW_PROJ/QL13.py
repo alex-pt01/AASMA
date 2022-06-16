@@ -16,14 +16,11 @@ class puzzle13:
         self.goal = get_coordinates_puzzle13(filename)[4]
         self.shortest = []
         self.remember = []
-        self.key = 0    
         self.discount =  0.9
         self.learning_rate =  0.9
         self.greedy = 0.9
-        self.index = 0
         self.paths = []
         self.Q = pd.DataFrame(columns=self.actions, dtype=np.float64)
-        self.final_Q = pd.DataFrame(columns=self.actions, dtype=np.float64)
         self.steps = []
         self.costs = []
         self.eps_max = 0.99
@@ -45,7 +42,7 @@ class puzzle13:
                 self.agent_location = (self.agent_location[0]+1, self.agent_location[1])
 
         self.remember.append(action)
-        self.index +=1
+   
         new_state = self.agent_location 
         
         if new_state == self.goal:

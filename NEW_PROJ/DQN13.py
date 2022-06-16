@@ -202,9 +202,9 @@ class DQNAgent13:
 
     def run_one(self,c):
         state = self.observation
-        cost = c  
         action = self.choose_action(state)       
         next_state, reward, win = self.move(action)
+        cost = c+ reward
         print(reward)
         self.store_transition(state, action, reward, next_state,win)
         self.observation = next_state

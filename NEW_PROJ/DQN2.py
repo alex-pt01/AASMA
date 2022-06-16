@@ -247,9 +247,9 @@ class DQNAgent2:
 
     def run_one(self,c):
         state = (self.observation[0],self.observation[1], np.float32(self.box1_location[0]),np.float32(self.box1_location[1]), np.float32(self.box2_location[0]), np.float32(self.box2_location[1]))
-        cost = c  
         action = self.choose_action(state)       
         next_state, reward, win = self.move(action)
+        cost = c+ reward
         pos = (next_state[0],next_state[1])
         self.store_transition(state, action, reward, next_state,win)
         self.observation = next_state

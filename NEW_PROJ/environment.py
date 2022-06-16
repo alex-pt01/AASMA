@@ -773,7 +773,32 @@ win_A2 = False
 a1_done = False
 a2_done = False
 
-number_of_rounds = 300
+costsa1 = []
+
+costsa2 = []
+
+cost_p1_a1 = 0
+cost_p2_a1 = 0
+cost_p3_a1 = 0
+
+cost_p1_a2 = 0
+cost_p2_a2 = 0
+cost_p3_a2 = 0
+
+costs_p1_a1 = []
+costs_p2_a1 = []
+costs_p3_a1 = []
+
+costs_p1_a2 = []
+costs_p2_a2 = []
+costs_p3_a2 = []
+
+
+costa1 = 0
+
+costa2 = 0
+
+number_of_rounds = 200
 i = 0
 while i < number_of_rounds:
     if game.is_completed():
@@ -844,7 +869,7 @@ while i < number_of_rounds:
         #Agent2 -> Q-Learning
         if p1:
             print("p1")
-            action,win, cost =  puzzle1.run_one(0)
+            action,win, costa2 =  puzzle1.run_one(0)
             print("COST", cost)
             if action == 'UP': 
                 game.move(0,-1, True, a2)
@@ -865,7 +890,7 @@ while i < number_of_rounds:
                 p2 = True
         
         if p2:
-            action, win, cost, pos = puzzle_2.run_one(0)
+            action, win, costa2, pos = puzzle_2.run_one(0)
             #print("p2")
             if action == 'UP': 
                 game.move(0,-1, True, a2)
@@ -889,7 +914,7 @@ while i < number_of_rounds:
 
         if p3:
             time1=time.time()
-            action, win, cost = puzzle_3.run_one(0)
+            action, win, costa2 = puzzle_3.run_one(0)
             if action == 'UP': 
                 game.move(0,-1, True, a2)
                 steps_A2_p3 +=1
@@ -903,6 +928,8 @@ while i < number_of_rounds:
                 game.move(1,0, True,  a2)
                 steps_A2_p3 +=1
             if win:
+
+              
                 time_A2_p3_final = time.time() - time_A2_p3_init
                 p1 = True
                 p2 = False
@@ -926,8 +953,8 @@ while i < number_of_rounds:
             steps_A1 += 1
             if p1_DQN:
                 
-                action,win, cost =  puzzle1_DQN.run_one(0)
-                steps_A2_p1 +=1
+                action,win, cost_p1_a1=  puzzle1_DQN.run_one(cost_p1_a1)
+                steps_A1_p1 +=1
                # print("COST", cost)
                 if action == 2: 
                     game.move(0,-1, True, a1)
@@ -942,6 +969,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    costs_p1_a1.append(cost_p1_a1)
                     stepsA1p1.append(steps_A1_p1)
                     steps_A1_p1 = 0
                     time_A2_p1_final = time.time() - time_A2_p1_init
@@ -951,7 +979,7 @@ while i < number_of_rounds:
             
             if p2_DQN:
                 steps_A1_p2 +=1
-                action, win, cost, pos = puzzle2_DQN.run_one(0)
+                action, win, cost_p2_a1, pos = puzzle2_DQN.run_one(cost_p2_a1)
                 #print("p2")
                 if action == 2: 
                     game.move(0,-1, True, a1)
@@ -966,6 +994,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    costs_p2_a1.append(cost_p2_a1)
                     stepsA1p2.append(steps_A1_p2)
                     steps_A1_p2 = 0
                     time_A2_p2_final = time.time() - time_A2_p2_init
@@ -978,7 +1007,7 @@ while i < number_of_rounds:
             if p3_DQN:
                 steps_A1_p3 +=1
                 time1=time.time()
-                action, win, cost = puzzle3_DQN.run_one(0)
+                action, win, cost_p3_a1 = puzzle3_DQN.run_one(cost_p3_a1)
                 if action == 2: 
                     game.move(0,-1, True, a1)
                     #steps_A2_p1 +=1
@@ -992,6 +1021,12 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    costs_p3_a1.append(cost_p3_a1)
+                    costsa1.append(cost_p1_a1+cost_p2_a1+cost_p3_a1)
+                    cost_p1_a1=0
+                    cost_p2_a1=0
+                    cost_p3_a1=0
+                    costa1 = 0
                     stepsA1p3.append(steps_A1_p3)
                     steps_A1_p3 = 0
                     a1_done = True
@@ -1015,7 +1050,7 @@ while i < number_of_rounds:
           
             if p1:
                 steps_A2_p1 +=1
-                action,win, cost =  puzzle1.run_one(0)
+                action,win, cost_p1_a2 =  puzzle1.run_one(cost_p1_a2)
                 #print("COST", cost)
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
@@ -1030,6 +1065,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a2)
                     #steps_A2_p1 +=1
                 if win:
+                    costs_p1_a2.append(cost_p1_a2)
                     stepsA2p1.append(steps_A2_p1)
                     steps_A2_p1 = 0
                     time_A2_p1_final = time.time() - time_A2_p1_init
@@ -1039,7 +1075,7 @@ while i < number_of_rounds:
             
             if p2:
                 steps_A2_p2 +=1
-                action, win, cost, pos = puzzle_2.run_one(0)
+                action, win, cost_p2_a2, pos = puzzle_2.run_one(cost_p2_a2)
                 #print("p2")
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
@@ -1054,6 +1090,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a2)
                     # steps_A2_p2 +=1
                 if win:
+                    costs_p2_a2.append(cost_p2_a2)
                     stepsA2p2.append(steps_A2_p2)
                     steps_A2_p2 = 0
                     time_A2_p2_final = time.time() - time_A2_p2_init
@@ -1066,7 +1103,7 @@ while i < number_of_rounds:
             if p3:
                 steps_A2_p3 +=1
                 time1=time.time()
-                action, win, cost = puzzle_3.run_one(0)
+                action, win, cost_p3_a2 = puzzle_3.run_one(cost_p3_a2)
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
                     # steps_A2_p3 +=1
@@ -1080,6 +1117,13 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a2)
                     # steps_A2_p3 +=1
                 if win:
+                    costs_p3_a2.append(cost_p3_a2)
+                    costsa2.append(cost_p1_a2+cost_p2_a2+cost_p3_a2)
+                    cost_p1_a2=0
+                    cost_p2_a2=0
+                    cost_p3_a2=0
+                    
+                    costa2 = 0
                     stepsA2p3.append(steps_A2_p3)
                     steps_A2_p3 = 0
                     a2_done = True
@@ -1400,6 +1444,44 @@ plt.legend(["Agent 1", "Agent 2"])
 plt.title("Steps per round puzzle3")
 plt.ylabel("Steps")
 plt.xlabel("Rounds")
+fig5 = plt.figure(figsize =(5, 4)) 
+plt.plot(costsa1, c = 'b')
+plt.plot(costsa2,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Reward per round")
+plt.ylabel("Reward")
+plt.xlabel("Rounds")
+fig6 = plt.figure(figsize =(5, 4)) 
+plt.plot(costs_p1_a1, c = 'b')
+plt.plot(costs_p1_a2,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Reward per round puzzle1")
+plt.ylabel("Reward")
+plt.xlabel("Rounds")
+fig7 = plt.figure(figsize =(5, 4)) 
+plt.plot(costs_p2_a1, c = 'b')
+plt.plot(costs_p2_a2,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Reward per round puzzle2")
+plt.ylabel("Reward")
+plt.xlabel("Rounds")
+fig8 = plt.figure(figsize =(5, 4)) 
+plt.plot(costs_p3_a1, c = 'b')
+plt.plot(costs_p3_a2,  c = 'r')
+plt.legend(["Agent 1", "Agent 2"])
+plt.title("Reward per round puzzle3")
+plt.ylabel("Reward")
+plt.xlabel("Rounds")
+
+
+
+
+
+
+
+
+
+plt.show()
 
 
 
