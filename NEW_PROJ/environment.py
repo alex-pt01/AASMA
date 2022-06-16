@@ -15,7 +15,7 @@ from DQN13 import DQNAgent13
 from DQN2 import DQNAgent2
 import matplotlib.pyplot as plt
 
-
+import numpy as np
 
 class game:
     
@@ -680,11 +680,11 @@ a2_done = False
 p1_DQN = True
 p2_DQN = False
 p3_DQN = False
-puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4,
+puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=0.9, batch_size=64, n_actions=4,
                   input_dims=[2], lr=0.001)
-puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, 
+puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=0.9, batch_size=64, n_actions=4, 
                   input_dims=[6], lr=0.001)
-puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, 
+puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=0.9, batch_size=64, n_actions=4, 
                   input_dims=[2], lr=0.001)
 
 
@@ -928,7 +928,7 @@ while 1:
                     #steps_A2_p1 +=1
                 if win:
                     time_A2_p1_final = time.time() - time_A2_p1_init
-                    puzzle1_DQN.change_init_position( (3, 1))
+                    puzzle1_DQN.change_init_position( (np.float32(3), np.float32(1)))
                     p1_DQN = False
                     p2_DQN = True
             
@@ -952,7 +952,7 @@ while 1:
                     time_A2_p2_final = time.time() - time_A2_p2_init
                     p2_DQN = False
                     p3_DQN = True
-                    puzzle3_DQN.change_init_position((12,pos[1]))
+                    puzzle3_DQN.change_init_position((np.float32(12),np.float32(pos[1])))
                     puzzle2_DQN.reset()
 
 

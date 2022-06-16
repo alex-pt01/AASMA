@@ -9,7 +9,7 @@ import torchvision.transforms as T
 
 import tensorflow as tf
 
-from functions import get_coordinates_puzzle13
+from functions import get_coordinates_puzzle13, manhattan_distance
 
 
 
@@ -44,7 +44,7 @@ class DQNAgent13:
         self.gamma = gamma
         self.epsilon = epsilon
         self.eps_max = 0.99
-        self.eps_dec = 5e-4
+        self.eps_add = 5e-4
         self.lr = lr
         self.action_space = [i for i in range(n_actions)]
         self.mem_size = 100000
@@ -79,6 +79,7 @@ class DQNAgent13:
         self.paths = []
         self.steps = []
         self.costs = []
+        self.last_distance = manhattan_distance(self.init_observation, self.goal)
       
 
 
@@ -163,8 +164,13 @@ class DQNAgent13:
                 self.shortest = self.remember
             self.remember = []
         else:
+            reward = -0.5
+            new_distance = manhattan_distance(self.observation, self.goal)
+            if new_distance < self.last_distance:
+                reward = 0.1
+            self.last_distance = new_distance
             win = False
-            reward = -0.1
+            
          
         return new_state, reward, win
 
@@ -199,6 +205,7 @@ class DQNAgent13:
         cost = c  
         action = self.choose_action(state)       
         next_state, reward, win = self.move(action)
+        print(reward)
         self.store_transition(state, action, reward, next_state,win)
         self.observation = next_state
         state = next_state
@@ -209,6 +216,7 @@ class DQNAgent13:
     def change_init_position(self, pos):
         self.init_observation =pos
         self.observation = pos
+        self.last_distance = manhattan_distance(pos,self.goal)
 
 def main():
     #def __init__(self,filename, input_dims, batch_size, gamma, epsilon, num_actions,
