@@ -573,25 +573,18 @@ def display_end(screen):
     pygame.draw.rect(screen, (255,255,255),
                    ((screen.get_width() / 2) - 102,
                     (screen.get_height() / 2) - 12,
-                    204,24), 1)
+                    204,34), 1)
     screen.blit(fontobject.render(message, 1, (255,255,255)),
                 ((screen.get_width() / 2) - 60, (screen.get_height() / 2) - 90))
     pygame.display.flip()
 
 def display_box(screen, message):
   "Print a message in a box in the middle of the screen"
-  fontobject = pygame.font.Font(None,18)
-  pygame.draw.rect(screen, (0,0,0),
-                   ((screen.get_width() / 2) - 100,
-                    (screen.get_height() / 2) - 10,
-                    450,30), 0)
-  pygame.draw.rect(screen, (255,255,255),
-                   ((screen.get_width() / 2) - 300,
-                    (screen.get_height() / 2) - 12,
-                    620,18), 1)
+  fontobject = pygame.font.Font(None,34)
+
   if len(message) != 0:
     screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 300, (screen.get_height() / 2) - 10))
+                ((screen.get_width() / 2) - 470, (screen.get_height() / 2) - 10))
   pygame.display.flip()
 
 
@@ -599,7 +592,7 @@ def ask(screen, question):
   "ask(screen, question) -> answer"
   pygame.font.init()
   current_string = []
-  display_box(screen, question + "  : " + "".join(current_string)
+  display_box(screen, question + "     " + "".join(current_string)
 )
   while 1:
     inkey = get_key()
@@ -617,11 +610,11 @@ def ask(screen, question):
 
 
 def agentType():
-    start = pygame.display.set_mode((660,240))
+    start = pygame.display.set_mode((1100,240))
 
     #game_option = ask(pygame.display.set_mode((320,1500)),"Game option: \nX: one agent\n Y: agent1 vs agent2\n Z: user vs agent2")
 
-    agent_type = ask(start,"OPTION:  1) User Vs Random Agent  2) DQ-Learning Agent Vs Q-Learning Agent   3) Q-Learning Agent  Vs  Random")
+    agent_type = ask(start,"OPTION:  1) Random Vs Q-Learning    2) DQN Vs Q-Learning    3) Random Vs DQN ")
     if int(agent_type) > 0 and int(agent_type)<=3: # and (game_option=='X' or game_option=='Y' or game_option=='Z'):
         return agent_type #, game_option
     else:
@@ -677,6 +670,7 @@ puzzle_3 = puzzle13("./puzzle_splitted3.txt", (3, 1))
 p1_DQN = True
 p2_DQN = False
 p3_DQN = False
+
 puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
                   input_dims=[2], lr=0.001)
 puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
@@ -896,7 +890,7 @@ while 1:
 
 
 
-
+    
     #USER vs DQN -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==2: 
         for event in pygame.event.get():
@@ -1154,7 +1148,7 @@ while 1:
                 time_A2_p2_final = 0
                 time_A2_p3_final = 0    
 
- 
+    
         
 
 
