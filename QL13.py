@@ -1,6 +1,6 @@
+# Implementation of Q-learning for puzzle 1 and 3
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from functions import get_coordinates_puzzle13
 
 
@@ -109,7 +109,6 @@ class puzzle13:
                 action = self.get_action(str(state))       
                 next_state, reward, win = self.move(action)
                 cost += self.learn( str(state), action, reward,str(next_state))
-
                 state = next_state
 
                 j+=1
@@ -133,7 +132,7 @@ class puzzle13:
 
             state = next_state
 
-            return action, win, cost, self.greedy
+            return action, win, cost
 
 
 
@@ -142,9 +141,6 @@ def main():
     puzzle = puzzle13("./puzzle_splitted3.txt", (12, 4))
     puzzle.run_puzzle(100)
     print(puzzle.shortest)
-    plt.plot(1,[29])
-    plt.plot(1,[50])
-    plt.show()
 if __name__ == '__main__':
     
     main()

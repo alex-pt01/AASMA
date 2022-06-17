@@ -73,9 +73,6 @@ def get_coordinates_puzzle13(filename):
 
 
 
-def manhattan_distance(location1, location2):
-    return abs(location1[0] - location2[0]) + abs(location1[1] - location2[1])
-
 def get_coordinates_puzzle2(filename):
     with open(filename, "r") as file:
         map = file.readlines()

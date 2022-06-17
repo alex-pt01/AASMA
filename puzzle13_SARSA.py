@@ -1,6 +1,6 @@
+# Implementation of SARSA for puzzle 1 and 3
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from functions import get_coordinates_puzzle13
 
 
@@ -26,9 +26,7 @@ class puzzle13_SARSA:
         self.paths = []
         self.shortest = []
         self.Q = pd.DataFrame(columns=self.actions, dtype=np.float64)
-        # Creating Q-table for cells of the final route
         self.final_Q = pd.DataFrame(columns=self.actions, dtype=np.float64)
-        # change
         self.first = True
 
         self.eps_max =0.99
@@ -69,14 +67,8 @@ class puzzle13_SARSA:
         return new_state, reward, win
 
     def get_action(self,state):
-        if state not in self.Q.index:#Muuta!!
-             self.Q = self.Q.append(
-                pd.Series(
-                    [0]*len(self.actions),
-                    index=self.Q.columns,
-                    name=state,
-                )
-            )
+        if state not in self.Q.index:
+            self.Q = self.Q.append( pd.Series( [0,0,0,0], index=self.Q.columns,name=state, ) )
 
         random = np.random.uniform()
         if self.greedy < random:
@@ -89,21 +81,16 @@ class puzzle13_SARSA:
             return state_action.idxmax()
 
 
-    def learn(self, state, action, reward, next_state):#muuta koko paska
-        if next_state not in self.Q.index:#Muuta!!
-             self.Q = self.Q.append(
-                pd.Series(
-                    [0]*len(self.actions),
-                    index=self.Q.columns,
-                    name=next_state,
-                )
-            )
+    def learn(self, state, action, reward, next_state):
+        if next_state not in self.Q.index:
+             self.Q = self.Q.append( pd.Series( [0,0,0,0], index=self.Q.columns,name=next_state ) )
+
         prediction = self.Q.loc[state,action]
             
         if next_state == self.goal:
             q_tar = reward
         else:
-            q_tar = reward + self.discount * self.Q.loc[next_state, :].max() #Q lauseke
+            q_tar = reward + self.discount * self.Q.loc[next_state, :].max() 
 
         
         if(self.greedy<self.eps_max):
@@ -116,15 +103,9 @@ class puzzle13_SARSA:
 
     
     def SarsaLearn(self, state, action, reward, next_action, next_state):
-        #Verifies if State exists
         if next_state not in self.Q.index:
-            self.Q = self.Q.append(
-                pd.Series(
-                    [0]*len(self.actions),
-                    index=self.Q.columns,
-                    name=next_state,
-                )
-            )
+            self.Q = self.Q.append( pd.Series( [0,0,0,0], index=self.Q.columns,name=next_state ) )
+
         prediction = self.Q.loc[state,action]
 
         if next_state == self.goal:
@@ -140,11 +121,7 @@ class puzzle13_SARSA:
         return self.Q.loc[state, action]
     
 
-    def run_puzzle(self, n): #muuta
-        # Resulted list for the plotting Episodes via Steps
-        steps = []
-        # Summed costs for all episodes in resulted list
-        all_costs = []
+    def run_puzzle(self, n):
        
         for i in range(n):
             state = self.initial_agent_location
@@ -156,15 +133,8 @@ class puzzle13_SARSA:
 
             running = True
             while running:
-                
                 action = self.get_action(str(state))
-             
-                
                 next_state, reward, win = self.move(action)
-                
-                #Q-Learning e-greedy
-                #cost += self.learn( str(state), action, reward,str(next_state))
-                #SARSA e-greedy
                 next_action = self.get_action(str(next_state))
                 cost += self.SarsaLearn( str(state), action, reward, next_action, str(next_state))
                 state = next_state
@@ -172,8 +142,6 @@ class puzzle13_SARSA:
                 i+=1
 
                 if(win):
-                    steps += [i]
-                    all_costs += [cost]
                     running = False
     def change_init_position(self, pos):
         self.initial_agent_location =pos
@@ -189,7 +157,7 @@ class puzzle13_SARSA:
 
             state = next_state
             self.action=next_action
-            return next_action, win, cost, self.greedy
+            return next_action, win, cost
 
 
 def main():

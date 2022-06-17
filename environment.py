@@ -1,18 +1,14 @@
 from logging import raiseExceptions
 import sys
 import pygame
-import string
 import queue
 import random
 import time
 from agent import Agent
-#from viewer import *
 from consts import BLACK,RED,BLUE
 from functions import is_valid_value
 from QL13 import puzzle13
 from QL2 import puzzle2
-from DQN13 import DQNAgent13
-from DQN2 import DQNAgent2
 import matplotlib.pyplot as plt
 from puzzle2_SARSA import puzzle2_SARSA
 from puzzle13_SARSA import puzzle13_SARSA
@@ -22,6 +18,8 @@ class game:
     
     box_in_dock_a1 = False
     box_in_dock_a2 = False
+    a1_finish = False
+    a2_finish = False
     def is_valid_value(self,char):
         if ( char == ' 'or #floor
             char == '#' or #wall
@@ -63,7 +61,6 @@ class game:
     def __init__(self,filename,level):
         self.queue = queue.LifoQueue()
         self.matrix = []
-#        if level < 1 or level > 50:
         if int(level) < 1:
             print("ERROR: Level "+str(level)+" is out of range")
             sys.exit(1)
@@ -81,7 +78,7 @@ class game:
                         for c in line:
                             if c != '\n' and self.is_valid_value(c):
                                 row.append(c)
-                            elif c == '\n': #jump to next row when newline
+                            elif c == '\n':
                                 continue
                             else:
                                 print("ERROR: Level "+str(level)+" has invalid value "+c)
@@ -96,7 +93,7 @@ class game:
         for row in self.matrix:
             if len(row) > x:
                 x = len(row)
-        return (x * 32, y * 32 + 120)
+        return (x * 32, y * 32 + 40)
 
     def get_matrix(self):
         return self.matrix
@@ -182,8 +179,6 @@ class game:
 
     
     def move_box(self,x,y,a,b):
-#        (x,y) -> move to do
-#        (a,b) -> box to move
         current_box = self.get_content(x,y)
         future_box = self.get_content(x+a,y+b)
         boxes = ['1','2','3','4','5']
@@ -211,7 +206,7 @@ class game:
             self.set_content(x,y,' ')
 
         elif current_box in boxes and future_box in boxes_in_dock:
-            self.set_content(x+a,y+b,'*') #same 
+            self.set_content(x+a,y+b,'*') 
             self.set_content(x,y,' ')
             
 
@@ -224,23 +219,24 @@ class game:
             self.set_content(x,y,boxes_in_dock)
         elif current_box in boxes and future_box == '.':
             if(current_box == '2'):
-                self.set_content(x+a,y+b,'p') #same 
+                self.set_content(x+a,y+b,'p')  
                 self.set_content(x,y,' ')
             else:
-                self.set_content(x+a,y+b,'o') #same 
+                self.set_content(x+a,y+b,'o') 
                 self.set_content(x,y,' ')
         elif current_box in ['p','o'] and future_box == ' ':
             if(current_box == 'p'):
-                self.set_content(x+a,y+b,'2') #same 
+                self.set_content(x+a,y+b,'2') 
                 self.set_content(x,y,'.')
             else:
-                self.set_content(x+a,y+b,'3') #same 
+                self.set_content(x+a,y+b,'3') 
                 self.set_content(x,y,'.')
 
                 
     def reset(self):
         
-        
+        self.a1_finish = False
+        self.a2_finish = False
         self.box_in_dock_a1 = False
         self.box_in_dock_a2 = False
         self.last_box = ''
@@ -343,16 +339,19 @@ class game:
                 else:
                     self.set_content(current[0],current[1],'e')
 
-                #if save: self.queue.put((x,y,False))
+        
 
             elif (current[2] == '+' or current[2] == '-') and future == boxes_in_dock:
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],boxes_in_dock)
-                #if save: self.queue.put((x,y,False))
-            
 
+            
             #finish line
             elif (current[2] == '@' or current[2] == '=')  and future == 'z':
+                if agent.id == 1:
+                    self.a1_finish = True
+                elif agent.id == 2:
+                    self.a2_finish = True
                 self.set_content(current[0]+x,current[1]+y,current[2])
                 self.set_content(current[0],current[1],' ')
         
@@ -373,8 +372,7 @@ class game:
                 self.set_content(current[0]+x,current[1]+y,current[2])
                         
                     
-                #if save: self.queue.put((x,y,True))
-            
+    
             elif (current[2] == '@' or current[2] == '=') and future in boxes and future_box in boxes_in_dock:
 
                 self.move_box(current[0]+x,current[1]+y,x,y)
@@ -397,7 +395,7 @@ class game:
 
                     else:
                         self.box_in_dock_a2 =True
-                #if save: self.queue.put((x,y,True))
+
             elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box == ' ':
 
                 self.move_box(current[0]+x,current[1]+y,x,y)
@@ -406,8 +404,7 @@ class game:
                     self.set_content(current[0]+x,current[1]+y,'+')
                 elif agent.id == 2:
                     self.set_content(current[0]+x,current[1]+y,'-')
-       
-                #if save: self.queue.put((x,y,True))
+
             elif (current[2] == '@' or current[2] == '=') and future == '*' and future_box in boxes_in_dock:
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
@@ -415,7 +412,7 @@ class game:
                     self.set_content(current[0]+x,current[1]+y,'+')
                 elif agent.id == 2:
                     self.set_content(current[0]+x,current[1]+y,'-')
-                #if save: self.queue.put((x,y,True))
+
             if (current[2] == '+' or current[2] == '-') and future in boxes and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],'.')
@@ -424,23 +421,23 @@ class game:
                 elif agent.id == 2:
                     self.set_content(current[0]+x,current[1]+y,'=')
        
-                #if save: self.queue.put((x,y,True))
+
             elif (current[2] == '+' or current[2] == '-') and future in boxes and future_box in boxes_in_dock:
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],boxes_in_dock[boxes.index(future)])
                 self.set_content(current[0]+x,current[1]+y,current[2])
 
-                #if save: self.queue.put((x,y,True))
+
             elif (current[2] == '+' or current[2] == '-') and future == '*' and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],boxes_in_dock)
                 self.set_content(current[0]+x,current[1]+y,current[2])
-                #if save: self.queue.put((x,y,True))
+ 
             elif (current[2] == '+' or current[2] == '-') and future == '*' and future_box in boxes_in_dock:
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],boxes_in_dock)
                 self.set_content(current[0]+x,current[1]+y,current[2])
-                #if save: self.queue.put((x,y,True))
+
             elif (current[2] == '@' or current[2] == '=') and future == '!' and future_box == ' ':
                 self.move_box(current[0]+x,current[1]+y,x,y)
                 self.set_content(current[0],current[1],' ')
@@ -583,11 +580,11 @@ def display_end(screen):
 
 def display_box(screen, message):
   "Print a message in a box in the middle of the screen"
-  fontobject = pygame.font.Font(None,34)
+  fontobject = pygame.font.Font(None,30)
 
   if len(message) != 0:
     screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 470, (screen.get_height() / 2) - 10))
+                ((screen.get_width() / 2) - 470, (screen.get_height() / 2 -10) ))
   pygame.display.flip()
 
 
@@ -613,13 +610,12 @@ def ask(screen, question):
 
 
 def agentType():
-    start = pygame.display.set_mode((1100,240))
+    start = pygame.display.set_mode((1000,240))
 
-    #game_option = ask(pygame.display.set_mode((320,1500)),"Game option: \nX: one agent\n Y: agent1 vs agent2\n Z: user vs agent2")
 
-    agent_type = ask(start,"OPTION:  1) Random Vs Q-Learning    2) DQN Vs Q-Learning    3) Random Vs DQN ")
-    if int(agent_type) > 0 and int(agent_type)<=3: # and (game_option=='X' or game_option=='Y' or game_option=='Z'):
-        return agent_type #, game_option
+    agent_type = ask(start,"OPTION:  1) Random Vs Q-Learning    2) SARSA Vs Q-Learning    3) Random Vs SARSA ")
+    if int(agent_type) > 0 and int(agent_type)<=3:
+        return agent_type 
     else:
         print("ERROR: Invalid Level or game option: "+str(agent_type))
         sys.exit(2)
@@ -653,7 +649,7 @@ pygame.init()
 
 
 agent_type= agentType()
-game = game('levels',1) #level1
+game = game('levels',1)
 size = game.load_size()
 screen = pygame.display.set_mode(size)
 
@@ -677,6 +673,7 @@ p3_SARSA = False
 #puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=0.5, batch_size=64, n_actions=4,input_dims=[2], lr=0.001)
 #puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=0.5, batch_size=64, n_actions=4, input_dims=[6], lr=0.9)
 #puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=5, batch_size=64, n_actions=4, input_dims=[2], lr=0.001)
+
 puzzle_1_SARSA = puzzle13_SARSA("./puzzle_splitted1.txt", (3, 1))
 puzzle_2_SARSA= puzzle2_SARSA("./puzzle_splited2.txt")
 puzzle_3_SARSA = puzzle13_SARSA("./puzzle_splitted3.txt", (3, 1))
@@ -704,43 +701,7 @@ def random_actions(pygame, game, agent, action):
     elif action == 'RIGHT':
         game.move(1,0, True,  agent)
 
-time_A2_p1_init = time.time()
-time_A2_p1_final = 0
-time_A2_p2_init = time.time()
-time_A2_p2_final = 0
-time_A2_p3_init= time.time()
-time_A2_p3_final = 0
 
-time_A1_p1_init = time.time()
-time_A1_p1_final = 0
-time_A1_p2_init = time.time()
-time_A1_p2_final = 0
-time_A1_p3_init= time.time()
-time_A1_p3_final = 0
-
-flag_p1_A1 = False
-flag_p2_A1 = False
-flag_p3_A1 = False
-
-flag_p1_A2 = False
-flag_p2_A2 = False
-flag_p3_A2 = False
-
-final_steps_A2_p1 = 0
-final_steps_A2_p2 = 0
-final_steps_A2_p3 = 0
-
-final_steps_A1_p1 = 0
-final_steps_A1_p2 = 0
-final_steps_A1_p3 = 0
-
-flag_steps_A1_p1 = False
-flag_steps_A1_p2 = False
-flag_steps_A1_p3 = False
-
-flag_steps_A2_p1 = False
-flag_steps_A2_p2 = False
-flag_steps_A2_p3 = False
 
 steps_A1 = 0
 steps_A2 = 0
@@ -797,29 +758,24 @@ costs_p1_a2 = []
 costs_p2_a2 = []
 costs_p3_a2 = []
 
-eps_p1_a1 = 0
-eps_p2_a1 = 0
-eps_p3_a1 = 0
-
-eps_p1_a2 = 0
-eps_p2_a2 = 0
-eps_p3_a2 = 0
-
-
-epsi_p1_a1 = []
-epsi_p2_a1 = []
-epsi_p3_a1 = []
-
-epsi_p1_a2 = []
-epsi_p2_a2 = []
-epsi_p3_a2 = []
+fig1 = plt.figure() 
+def make_plot(name1 , name2, step1, step2):
+    plt.plot(step1, c = 'b')
+    plt.plot(step2,  c = 'r')
+    plt.legend([name1, name2])
+    plt.title("Steps Per Episode")
+    plt.ylabel("Steps")
+    plt.xlabel("Episode")
+    plt.show(block=False)
+    plt.pause(.1)
 
 
 costa1 = 0
 
 costa2 = 0
 
-number_of_rounds = 150
+#How many episodes will be played
+number_of_rounds = 100
 i = 0
 while i < number_of_rounds:
     print("round")
@@ -828,7 +784,7 @@ while i < number_of_rounds:
         game.reset()
         
     clock = pygame.time.Clock()
-    #Initialise player scores
+
 
     print_game(game.get_matrix(),screen)
     
@@ -836,248 +792,22 @@ while i < number_of_rounds:
     if int(agent_type) ==1:
 
         #AGENTE 1 - RANDOM
-        action = random.choice(a1.actions())	
-        random_actions(pygame, game, a1,action)
-        steps_A1 +=1
-        
-        #time and steps puzzle1
-        if game.agent_position(a1)[1] <16: # -> p2
-            #time
-            if flag_p1_A1 == False:
-                time_A1_p1_final = time.time() - time_A1_p1_init
-                flag_p1_A1 = True
-            #steps
-            if flag_steps_A1_p1 == False:
-                final_steps_A1_p1 = steps_A1
-                flag_steps_A1_p1 = True
-
-            #time and steps puzzle2
-            box_1_pressed_A1 = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
-            box_2_pressed_A1 = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
-            if box_1_pressed_A1:
-                box_in_dock_1_A1 = True
-            if box_2_pressed_A1:
-                box_in_dock_2_A1 = True
-            
-            if box_in_dock_1_A1 and box_in_dock_2_A1 :
-                #time
-                if flag_p2_A1 == False:
-                    time_A1_p2_final = time.time() - time_A1_p2_init
-                    flag_p2_A1 = True
-                #steps
-                if flag_steps_A1_p2 == False:
-                    final_steps_A1_p2 = steps_A1
-                    flag_steps_A1_p2 = True
-
-
-            #time and steps puzzle3
-            if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
-                #steps
-                final_steps_A1_p3 = steps_A1
-                #time                    
-                time_A1_p1_final = 0
-                time_A1_p2_final = 0
-                time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
-                #flags
-                flag_p2_A1 = False
-                flag_p1_A1 = False
-                flag_p3_A1 = False
-                #steps                             
-                final_steps_A1_p1 = 0
-                final_steps_A1_p2 = 0
-                final_steps_A1_p3 = 0
-                game.reset()   
-
-    
-        #Agent2 -> Q-Learning
-        if p1:
-
-            action,win, costa2 =  puzzle1.run_one(0)
-            print("COST", cost)
-            if action == 'UP': 
-                game.move(0,-1, True, a2)
-                steps_A2_p1 +=1
-            elif action == 'DOWN': 
-                game.move(0,1, True, a2)
-                steps_A2_p1 +=1
-            elif action == 'LEFT': 
-                game.move(-1,0, True,  a2)
-                steps_A2_p1 +=1
-            elif action == 'RIGHT': 
-                game.move(1,0, True,  a2)
-                steps_A2_p1 +=1
-            if win:
-                time_A2_p1_final = time.time() - time_A2_p1_init
-                puzzle1.change_init_position( (3, 1))
-                p1 = False
-                p2 = True
-        
-        if p2:
-            action, win, costa2, pos = puzzle_2.run_one(0)
-            #print("p2")
-            if action == 'UP': 
-                game.move(0,-1, True, a2)
-                steps_A2_p2 +=1
-            elif action == 'DOWN': 
-                game.move(0,1, True, a2)
-                steps_A2_p2 +=1
-            elif action == 'LEFT': 
-                game.move(-1,0, True,  a2)
-                steps_A2_p2 +=1
-            elif action == 'RIGHT': 
-                game.move(1,0, True,  a2)
-                steps_A2_p2 +=1
-            if win:
-                time_A2_p2_final = time.time() - time_A2_p2_init
-                p2 = False
-                p3 = True
-                puzzle_3.change_init_position((12,pos[1]))
-                puzzle_2.reset()
-
-
-        if p3:
-            time1=time.time()
-            action, win, costa2 = puzzle_3.run_one(0)
-            if action == 'UP': 
-                game.move(0,-1, True, a2)
-                steps_A2_p3 +=1
-            elif action == 'DOWN': 
-                game.move(0,1, True, a2)
-                steps_A2_p3 +=1
-            elif action == 'LEFT': 
-                game.move(-1,0, True,  a2)
-                steps_A2_p3 +=1
-            elif action == 'RIGHT': 
-                game.move(1,0, True,  a2)
-                steps_A2_p3 +=1
-            if win:
-
-              
-                time_A2_p3_final = time.time() - time_A2_p3_init
-                p1 = True
-                p2 = False
-                p3 = False
-                steps_A2_p1= 0
-                steps_A2_p2= 0
-                steps_A2_p3 = 0
-                game.reset()
-
-                time_A2_p1_final = 0
-                time_A2_p2_final = 0
-                time_A2_p3_final = 0          
-        
-
-    
-    #SARSAvs Q-Learning -----------------------------------------------------------------------------------------------------
-    elif int(agent_type) ==2: 
-        #Agent1 -> User input
         if not a1_done:
-            #Agent1 -> SARSA
-            steps_A1 += 1
-            if p1_SARSA:
-                
-                action,win, cost_p1_a1, eps_p1_a1 =  puzzle_1_SARSA.run_one(cost_p1_a1)
-    
-                steps_A1_p1 +=1
-               # print("COST", cost)
-                if action == 'UP': 
-                    game.move(0,-1, True, a1)
-                    # steps_A2_p1 +=1
-                elif action == 'DOWN': 
-                    game.move(0,1, True, a1)
-                    # steps_A2_p1 +=1
-                elif action == 'LEFT': 
-                    game.move(-1,0, True,  a1)
-                    #steps_A2_p1 +=1
-                elif action == 'RIGHT': 
-                    game.move(1,0, True,  a1)
-                    #steps_A2_p1 +=1
-                if win:
-                    epsi_p1_a1.append(eps_p1_a1)
-                    costs_p1_a1.append(cost_p1_a1)
-                    stepsA1p1.append(steps_A1_p1)
-                    steps_A1_p1 = 0
-                    time_A2_p1_final = time.time() - time_A2_p1_init
-                    puzzle_1_SARSA.change_init_position( (np.float32(3), np.float32(1)))
-                    p1_SARSA = False
-                    p2_SARSA = True
-            
-            if p2_SARSA:
-                steps_A1_p2 +=1
-                action, win, cost_p2_a1, pos, eps_p2_a1 = puzzle_2_SARSA.run_one(cost_p2_a1)
-                #print("p2")
-                if action == 'UP': 
-                    game.move(0,-1, True, a1)
-                    # steps_A2_p1 +=1
-                elif action == 'DOWN': 
-                    game.move(0,1, True, a1)
-                    # steps_A2_p1 +=1
-                elif action == 'LEFT': 
-                    game.move(-1,0, True,  a1)
-                    #steps_A2_p1 +=1
-                elif action == 'RIGHT': 
-                    game.move(1,0, True,  a1)
-                    #steps_A2_p1 +=1
-                if win:
-                    epsi_p2_a1.append(eps_p2_a1)
-                    costs_p2_a1.append(cost_p2_a1)
-                    stepsA1p2.append(steps_A1_p2)
-                    steps_A1_p2 = 0
-                    time_A2_p2_final = time.time() - time_A2_p2_init
-                    p2_SARSA = False
-                    p3_SARSA = True
-                    puzzle_3_SARSA.change_init_position((12,pos[1]))
-                    puzzle_2_SARSA.reset()
+            action = random.choice(a1.actions())	
+            random_actions(pygame, game, a1,action)
+            steps_A1 +=1
+            if game.a1_finish:
+                a1_done = True
 
-
-            if p3_SARSA:
-                steps_A1_p3 +=1
-                time1=time.time()
-                action, win, cost_p3_a1, eps_p3_a1 =  puzzle_3_SARSA.run_one(cost_p3_a1)
-                if action == 'UP': 
-                    game.move(0,-1, True, a1)
-                    # steps_A2_p1 +=1
-                elif action == 'DOWN': 
-                    game.move(0,1, True, a1)
-                    # steps_A2_p1 +=1
-                elif action == 'LEFT': 
-                    game.move(-1,0, True,  a1)
-                    #steps_A2_p1 +=1
-                elif action == 'RIGHT': 
-                    game.move(1,0, True,  a1)
-                    #steps_A2_p1 +=1
-                if win:
-                    epsi_p3_a1.append(eps_p3_a1)
-                    costs_p3_a1.append(cost_p3_a1)
-                    costsa1.append(cost_p1_a1+cost_p2_a1+cost_p3_a1)
-                    cost_p1_a1=0
-                    cost_p2_a1=0
-                    cost_p3_a1=0
-                    costa1 = 0
-                    stepsA1p3.append(steps_A1_p3)
-                    steps_A1_p3 = 0
-                    a1_done = True
-                    time_A2_p3_final = time.time() - time_A2_p3_init
-                    p1_SARSA = True
-                    p2_SARSA = False
-                    p3_SARSA = False
-                   
-                    #steps_A2_p1= 0
-                    #steps_A2_p2= 0
-                    #steps_A2_p3 = 0
-          
-                    # time_A2_p1_final = 0
-                    #time_A2_p2_final = 0
-                    #time_A2_p3_final = 0    
-            
-
+        
+        #Agent2 -> Q-Learning
         if not a2_done:
-            #Agent2 -> Q-Learning
+           
             steps_A2 +=1
           
             if p1:
                 steps_A2_p1 +=1
-                action,win, cost_p1_a2, eps_p1_a2 =  puzzle1.run_one(cost_p1_a2)
+                action,win, cost_p1_a2 =  puzzle1.run_one(cost_p1_a2)
                 #print("COST", cost)
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
@@ -1092,37 +822,34 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a2)
                     #steps_A2_p1 +=1
                 if win:
-                    epsi_p1_a2.append(eps_p1_a2)
                     costs_p1_a2.append(cost_p1_a2)
                     stepsA2p1.append(steps_A2_p1)
                     steps_A2_p1 = 0
-                    time_A2_p1_final = time.time() - time_A2_p1_init
                     puzzle1.change_init_position( (3, 1))
                     p1 = False
                     p2 = True
             
             if p2:
                 steps_A2_p2 +=1
-                action, win, cost_p2_a2, pos, eps_p2_a2 = puzzle_2.run_one(cost_p2_a2)
-                #print("p2")
+                action, win, cost_p2_a2, pos = puzzle_2.run_one(cost_p2_a2)
+
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
-                    # steps_A2_p2 +=1
+ 
                 elif action == 'DOWN': 
                     game.move(0,1, True, a2)
-                    # steps_A2_p2 +=1
+
                 elif action == 'LEFT': 
                     game.move(-1,0, True,  a2)
-                    # steps_A2_p2 +=1
+
                 elif action == 'RIGHT': 
                     game.move(1,0, True,  a2)
-                    # steps_A2_p2 +=1
+            
                 if win:
-                    epsi_p2_a2.append(eps_p2_a2)
+    
                     costs_p2_a2.append(cost_p2_a2)
                     stepsA2p2.append(steps_A2_p2)
                     steps_A2_p2 = 0
-                    time_A2_p2_final = time.time() - time_A2_p2_init
                     p2 = False
                     p3 = True
                     puzzle_3.change_init_position((12,pos[1]))
@@ -1132,21 +859,20 @@ while i < number_of_rounds:
             if p3:
                 steps_A2_p3 +=1
                 time1=time.time()
-                action, win, cost_p3_a2, eps_p3_a2= puzzle_3.run_one(cost_p3_a2)
+                action, win, cost_p3_a2= puzzle_3.run_one(cost_p3_a2)
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
-                    # steps_A2_p3 +=1
+
                 elif action == 'DOWN': 
                     game.move(0,1, True, a2)
-                    # steps_A2_p3 +=1
+ 
                 elif action == 'LEFT': 
                     game.move(-1,0, True,  a2)
-                    # steps_A2_p3 +=1
+      
                 elif action == 'RIGHT': 
                     game.move(1,0, True,  a2)
-                    # steps_A2_p3 +=1
+           
                 if win:
-                    epsi_p3_a2.append(eps_p3_a2)
                     costs_p3_a2.append(cost_p3_a2)
                     costsa2.append(cost_p1_a2+cost_p2_a2+cost_p3_a2)
                     cost_p1_a2=0
@@ -1157,22 +883,210 @@ while i < number_of_rounds:
                     stepsA2p3.append(steps_A2_p3)
                     steps_A2_p3 = 0
                     a2_done = True
-                    time_A2_p3_final = time.time() - time_A2_p3_init
                     p1 = True
                     p2 = False
                     p3 = False
                     steps_A2_p1= 0
                     steps_A2_p2= 0
                     steps_A2_p3 = 0
-                    #game.reset()
 
-                    time_A2_p1_final = 0
-                    time_A2_p2_final = 0
-                    time_A2_p3_final = 0    
         if a1_done and a2_done:
             i+=1
             stepsA1.append(steps_A1)
             stepsA2.append(steps_A2)
+            make_plot("Agent1: Random" , "Agent2: Q-Learning",  stepsA1,stepsA2)
+            steps_A2 = 0
+            steps_A1 = 0
+            a1_done = False
+            a2_done = False
+            game.reset()
+
+
+    
+    #SARSAvs Q-Learning -----------------------------------------------------------------------------------------------------
+    elif int(agent_type) ==2: 
+        #Agent1 -> User input
+        if not a1_done:
+            #Agent1 -> SARSA
+            steps_A1 += 1
+            if p1_SARSA:
+                
+                action,win, cost_p1_a1=  puzzle_1_SARSA.run_one(cost_p1_a1)
+    
+                steps_A1_p1 +=1
+
+                if action == 'UP': 
+                    game.move(0,-1, True, a1)
+        
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a1)
+          
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a1)
+             
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a1)
+               
+                if win:
+                
+                    costs_p1_a1.append(cost_p1_a1)
+                    stepsA1p1.append(steps_A1_p1)
+                    steps_A1_p1 = 0
+                    puzzle_1_SARSA.change_init_position( (np.float32(3), np.float32(1)))
+                    p1_SARSA = False
+                    p2_SARSA = True
+            
+            if p2_SARSA:
+                steps_A1_p2 +=1
+                action, win, cost_p2_a1, pos = puzzle_2_SARSA.run_one(cost_p2_a1)
+             
+                if action == 'UP': 
+                    game.move(0,-1, True, a1)
+             
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a1)
+              
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a1)
+                
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a1)
+                
+                if win:
+                    costs_p2_a1.append(cost_p2_a1)
+                    stepsA1p2.append(steps_A1_p2)
+                    steps_A1_p2 = 0
+                    p2_SARSA = False
+                    p3_SARSA = True
+                    puzzle_3_SARSA.change_init_position((12,pos[1]))
+                    puzzle_2_SARSA.reset()
+
+
+            if p3_SARSA:
+                steps_A1_p3 +=1
+                time1=time.time()
+                action, win, cost_p3_a1=  puzzle_3_SARSA.run_one(cost_p3_a1)
+                if action == 'UP': 
+                    game.move(0,-1, True, a1)
+                 
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a1)
+  
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a1)
+          
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a1)
+              
+                if win:
+                    costs_p3_a1.append(cost_p3_a1)
+                    costsa1.append(cost_p1_a1+cost_p2_a1+cost_p3_a1)
+                    cost_p1_a1=0
+                    cost_p2_a1=0
+                    cost_p3_a1=0
+                    costa1 = 0
+                    stepsA1p3.append(steps_A1_p3)
+                    steps_A1_p3 = 0
+                    a1_done = True
+                    p1_SARSA = True
+                    p2_SARSA = False
+                    p3_SARSA = False
+                   
+
+            
+
+        if not a2_done:
+            #Agent2 -> Q-Learning
+            steps_A2 +=1
+          
+            if p1:
+                steps_A2_p1 +=1
+                action,win, cost_p1_a2 =  puzzle1.run_one(cost_p1_a2)
+                if action == 'UP': 
+                    game.move(0,-1, True, a2)
+      
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a2)
+ 
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a2)
+
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a2)
+
+                if win:
+                    costs_p1_a2.append(cost_p1_a2)
+                    stepsA2p1.append(steps_A2_p1)
+                    steps_A2_p1 = 0
+                    puzzle1.change_init_position( (3, 1))
+                    p1 = False
+                    p2 = True
+            
+            if p2:
+                steps_A2_p2 +=1
+                action, win, cost_p2_a2, pos = puzzle_2.run_one(cost_p2_a2)
+  
+                if action == 'UP': 
+                    game.move(0,-1, True, a2)
+          
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a2)
+                
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a2)
+      
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a2)
+              
+                if win:
+    
+                    costs_p2_a2.append(cost_p2_a2)
+                    stepsA2p2.append(steps_A2_p2)
+                    steps_A2_p2 = 0
+                    p2 = False
+                    p3 = True
+                    puzzle_3.change_init_position((12,pos[1]))
+                    puzzle_2.reset()
+
+
+            if p3:
+                steps_A2_p3 +=1
+                time1=time.time()
+                action, win, cost_p3_a2= puzzle_3.run_one(cost_p3_a2)
+                if action == 'UP': 
+                    game.move(0,-1, True, a2)
+        
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a2)
+                  
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a2)
+                
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a2)
+                   
+                if win:
+                    costs_p3_a2.append(cost_p3_a2)
+                    costsa2.append(cost_p1_a2+cost_p2_a2+cost_p3_a2)
+                    cost_p1_a2=0
+                    cost_p2_a2=0
+                    cost_p3_a2=0
+                    costa2 = 0
+                    stepsA2p3.append(steps_A2_p3)
+                    steps_A2_p3 = 0
+                    a2_done = True
+                    p1 = True
+                    p2 = False
+                    p3 = False
+                    steps_A2_p1= 0
+                    steps_A2_p2= 0
+                    steps_A2_p3 = 0
+            
+        if a1_done and a2_done:
+            i+=1
+            stepsA1.append(steps_A1)
+            stepsA2.append(steps_A2)
+            make_plot("Agent1: SARSA" , "Agent2: Q-Learning",  stepsA1,stepsA2)
             steps_A2 = 0
             steps_A1 = 0
             a1_done = False
@@ -1184,272 +1098,163 @@ while i < number_of_rounds:
 
 
 
-    #RANDOM vs DQN -----------------------------------------------------------------------------------------------------
+    #RANDOM vs SARSA -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==3:
-        #Agent1 -> RANDOM
-        action = random.choice(a1.actions())	
-        random_actions(pygame, game, a1,action)
-        steps_A1 +=1
+
+        if not a1_done:  
+            #Agent1 -> RANDOM
+            action = random.choice(a1.actions())	
+            random_actions(pygame, game, a1,action)
+            steps_A1 +=1
+            if game.a1_finish:
+                a1_done = True
         
-        #time and steps puzzle1
-        if game.agent_position(a1)[1] <16: # -> p2
-            #time
-            if flag_p1_A1 == False:
-                time_A1_p1_final = time.time() - time_A1_p1_init
-                flag_p1_A1 = True
-            #steps
-            if flag_steps_A1_p1 == False:
-                final_steps_A1_p1 = steps_A1
-                flag_steps_A1_p1 = True
-
-            #time and steps puzzle2
-            box_1_pressed_A1 = game.agent_position(a1)[0] == 1 and game.agent_position(a1)[1] ==12
-            box_2_pressed_A1 = game.agent_position(a1)[0] == 4 and game.agent_position(a1)[1] ==12
-            if box_1_pressed_A1:
-                box_in_dock_1_A1 = True
-            if box_2_pressed_A1:
-                box_in_dock_2_A1 = True
-            
-            if box_in_dock_1_A1 and box_in_dock_2_A1 :
-                #time
-                if flag_p2_A1 == False:
-                    time_A1_p2_final = time.time() - time_A1_p2_init
-                    flag_p2_A1 = True
-                #steps
-                if flag_steps_A1_p2 == False:
-                    final_steps_A1_p2 = steps_A1
-                    flag_steps_A1_p2 = True
-
-
-            #time and steps puzzle3
-            if game.agent_position(a1)[0] == 2 and game.agent_position(a1)[1] ==2:
-                #steps
-                final_steps_A1_p3 = steps_A1
-                #time                    
-                time_A1_p1_final = 0
-                time_A1_p2_final = 0
-                time_A1_p3_final = time.time() - time_A1_p3_init #DONT SHOW TIME #TODO
-                #flags
-                flag_p2_A1 = False
-                flag_p1_A1 = False
-                flag_p3_A1 = False
-                #steps                             
-                final_steps_A1_p1 = 0
-                final_steps_A1_p2 = 0
-                final_steps_A1_p3 = 0
-                game.reset()   
-
-
-
-        #Agent2 -> Q-Learning
-        if p1:
-        
-            action,win, cost =  puzzle1.run_one(0)
+         #Agent2 -> SARSA
+        if not a2_done:
+            steps_A2 += 1
+            if p1_SARSA:
+                
+                action,win, cost_p1_a2=  puzzle_1_SARSA.run_one(cost_p1_a2)
     
-            if action == 'UP': 
-                game.move(0,-1, True, a2)
                 steps_A2_p1 +=1
-            elif action == 'DOWN': 
-                game.move(0,1, True, a2)
-                steps_A2_p1 +=1
-            elif action == 'LEFT': 
-                game.move(-1,0, True,  a2)
-                steps_A2_p1 +=1
-            elif action == 'RIGHT': 
-                game.move(1,0, True,  a2)
-                steps_A2_p1 +=1
-            if win:
-                time_A2_p1_final = time.time() - time_A2_p1_init
-                puzzle1.change_init_position( (3, 1))
-                p1 = False
-                p2 = True
+          
+                if action == 'UP': 
+                    game.move(0,-1, True, a2)
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a2)
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a2)
+    
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a2)
+
+                if win:
+                
+                    costs_p1_a2.append(cost_p1_a2)
+                    stepsA2p1.append(steps_A2_p1)
+                    steps_A2_p1 = 0
+                    puzzle_1_SARSA.change_init_position( (3,1))
+                    p1_SARSA = False
+                    p2_SARSA = True
+            
+            if p2_SARSA:
+                steps_A2_p2 +=1
+                action, win, cost_p2_a2, pos = puzzle_2_SARSA.run_one(cost_p2_a2)
+
+                if action == 'UP': 
+                    game.move(0,-1, True, a2)
+
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a2)
+
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a2)
+
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a2)
+
+                if win:
+                    costs_p2_a2.append(cost_p2_a2)
+                    stepsA1p2.append(steps_A1_p2)
+                    steps_A2_p2 = 0
+                    p2_SARSA = False
+                    p3_SARSA = True
+                    puzzle_3_SARSA.change_init_position((12,pos[1]))
+                    puzzle_2_SARSA.reset()
+
+
+            if p3_SARSA:
+                steps_A2_p3 +=1
+                time1=time.time()
+                action, win, cost_p3_a2=  puzzle_3_SARSA.run_one(cost_p3_a2)
+                if action == 'UP': 
+                    game.move(0,-1, True, a2)
+              
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a2)
+                    
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a2)
+                
+                elif action == 'RIGHT': 
+                    game.move(1,0, True,  a2)
+            
+                if win:
+                    costs_p3_a2.append(cost_p3_a1)
+                    costsa2.append(cost_p1_a1+cost_p2_a1+cost_p3_a1)
+                    cost_p1_a2=0
+                    cost_p2_a2=0
+                    cost_p3_a1=0
+                    costa1 = 0
+                    stepsA2p3.append(steps_A2_p3)
+                    steps_A1_p3 = 0
+                    a2_done = True
+                    p1_SARSA = True
+                    p2_SARSA = False
+                    p3_SARSA = False
+                   
+            
+        if a1_done and a2_done:
+            i+=1
+            stepsA1.append(steps_A1)
+            stepsA2.append(steps_A2)
+            make_plot("Agent1: Random" , "Agent2: SARSA",  stepsA1,stepsA2)
+            steps_A2 = 0
+            steps_A1 = 0
+            a1_done = False
+            a2_done = False
+            game.reset()
+
         
-        if p2:
-            action, win, cost, pos = puzzle_2.run_one(0)
-            #print("p2")
-            if action == 'UP': 
-                game.move(0,-1, True, a2)
-                steps_A2_p2 +=1
-            elif action == 'DOWN': 
-                game.move(0,1, True, a2)
-                steps_A2_p2 +=1
-            elif action == 'LEFT': 
-                game.move(-1,0, True,  a2)
-                steps_A2_p2 +=1
-            elif action == 'RIGHT': 
-                game.move(1,0, True,  a2)
-                steps_A2_p2 +=1
-            if win:
-                time_A2_p2_final = time.time() - time_A2_p2_init
-                p2 = False
-                p3 = True
-                puzzle_3.change_init_position((12,pos[1]))
-                puzzle_2.reset()
-
-
-        if p3:
-            time1=time.time()
-            action, win, cost = puzzle_3.run_one(0)
-            if action == 'UP': 
-                game.move(0,-1, True, a2)
-                steps_A2_p3 +=1
-            elif action == 'DOWN': 
-                game.move(0,1, True, a2)
-                steps_A2_p3 +=1
-            elif action == 'LEFT': 
-                game.move(-1,0, True,  a2)
-                steps_A2_p3 +=1
-            elif action == 'RIGHT': 
-                game.move(1,0, True,  a2)
-                steps_A2_p3 +=1
-            if win:
-                time_A2_p3_final = time.time() - time_A2_p3_init
-                p1 = True
-                p2 = False
-                p3 = False
-                steps_A2_p1= 0
-                steps_A2_p2= 0
-                steps_A2_p3 = 0
-                game.reset()
-
-                time_A2_p1_final = 0
-                time_A2_p2_final = 0
-                time_A2_p3_final = 0    
-        
-
-
-
-
-
+   
 
     #STATISTICS------------------------------------------------------------------------------------------------------------------------
     def time_convert(time): #miliseconds
         return int(time*1000)
  
+    if int(agent_type) ==1:
+        font = pygame.font.Font(None, 23)
+        text = font.render(str("Agent1: Random"), 1, BLUE)
+        screen.blit(text, (5,644)) 
+        text = font.render(str("Agent2: Q-Learning"), 1, RED)
+        screen.blit(text, (195,644)) 
 
-    #Display scores:
-    font = pygame.font.Font(None, 18)
-    #Agent1 --------------------------------------
-    text = font.render(str("Agent1"), 1, BLUE)
-    screen.blit(text, (5,644)) 
-    text = font.render(str("Time(ms)"), 1, BLACK)
-    screen.blit(text, (60,644))   
-    text = font.render(str("Steps"), 1, BLACK)
-    screen.blit(text, (120,644)) 
+    if int(agent_type) ==2:
+        font = pygame.font.Font(None, 23)
+        text = font.render(str("Agent1: SARSA"), 1, BLUE)
+        screen.blit(text, (5,644)) 
+        text = font.render(str("Agent2: Q-Learning"), 1, RED)
+        screen.blit(text, (195,644)) 
 
-    text = font.render(str("Puzzle1"), 1, BLACK)
-    screen.blit(text, (5,664)) 
-    text = font.render(str("Puzzle2"), 1, BLACK)
-    screen.blit(text, (5,684)) 
-    text = font.render(str("Puzzle3"), 1, BLACK)
-    screen.blit(text, (5,704)) 
-    text = font.render(str("Total"), 1, BLACK)
-    screen.blit(text, (5,724))
-
-    #puzzle1 steps
-    text = font.render(str(final_steps_A1_p1), 1, BLACK)
-    screen.blit(text, (120,664)) 
-    #puzzle2 steps
-    text = font.render(str(final_steps_A1_p2), 1, BLACK)
-    screen.blit(text, (120,684)) 
-    #puzzle3 steps
-    text = font.render(str(final_steps_A1_p3), 1, BLACK)
-    screen.blit(text, (120,704)) 
-
-    #total steps
-    if final_steps_A1_p3 != final_steps_A1_p1 + final_steps_A1_p2 + final_steps_A1_p3:
-        text = font.render(str(final_steps_A1_p3), 1, BLACK)
-        screen.blit(text, (120,724)) 
-    else:
-        text = font.render(str(final_steps_A1_p1 + final_steps_A1_p2 + final_steps_A1_p3), 1, BLACK)
-        screen.blit(text, (120,724)) 
-
-
-    #puzzle1 time
-    text = font.render(str(time_convert(time_A1_p1_final)), 1, BLACK)
-    screen.blit(text, (60,664)) 
-    #puzzle2 time
-    text = font.render(str(time_convert(time_A1_p2_final)), 1, BLACK)
-    screen.blit(text, (60,684)) 
-    #puzzle3 time
-    text = font.render(str(time_convert(time_A1_p3_final)), 1, BLACK)
-    screen.blit(text, (60,704)) 
-
-
-
-
-
-    #Agent2--------------------------------------
-    text = font.render(str("Agent2"), 1, RED)
-    screen.blit(text, (195,644)) 
-    text = font.render(str("Time(ms)"), 1, BLACK)
-    screen.blit(text, (250,644))   
-    text = font.render(str("Steps"), 1, BLACK)
-    screen.blit(text, (310,644)) 
-
-    text = font.render(str("Puzzle1"), 1, BLACK)
-    screen.blit(text, (195,664)) 
-    text = font.render(str("Puzzle2"), 1, BLACK)
-    screen.blit(text, (195,684)) 
-    text = font.render(str("Puzzle3"), 1, BLACK)
-    screen.blit(text, (195,704)) 
-
-    #puzzle1 steps
-    text = font.render(str(final_steps_A2_p1), 1, BLACK)
-    screen.blit(text, (310,664)) 
-    #puzzle2 steps
-    text = font.render(str(final_steps_A2_p2), 1, BLACK)
-    screen.blit(text, (310,684)) 
-    #puzzle3 steps
-    text = font.render(str(final_steps_A2_p3), 1, BLACK)
-    screen.blit(text, (310,704)) 
-
-    #total steps
-
-
-    #total steps
-    if final_steps_A2_p3 != final_steps_A2_p1 + final_steps_A2_p2 + final_steps_A2_p3:
-        text = font.render(str(final_steps_A2_p3), 1, BLACK)
-        screen.blit(text, (310,724)) 
-    else:
-        text = font.render(str(final_steps_A2_p1 + final_steps_A2_p2 + final_steps_A2_p3), 1, BLACK)
-        screen.blit(text, (310,724)) 
+    if int(agent_type) ==3:
+        font = pygame.font.Font(None, 23)
+        text = font.render(str("Agent1: Random"), 1, BLUE)
+        screen.blit(text, (5,644)) 
+        text = font.render(str("Agent2: SARSA"), 1, RED)
+        screen.blit(text, (195,644)) 
         
-    #puzzle1 time
-    text = font.render(str(time_convert(time_A2_p1_final)), 1, BLACK)
-    screen.blit(text, (250,664)) 
-    #puzzle2 time
-    text = font.render(str(time_convert(time_A2_p2_final)), 1, BLACK)
-    screen.blit(text, (250,684)) 
-    #puzzle3 time
-    text = font.render(str(time_convert(time_A2_p3_final)), 1, BLACK)
-    screen.blit(text, (250,704)) 
-    #total time
-    #text = font.render(str(time_convert(timeAlg_final_A2)), 1, BLACK)
-    #screen.blit(text, (250,724)) 
-
-    # --- Go ahead and update the screen with what we've drawn.
-    pygame.display.flip()
-     
-    # --- Limit to 60 frames per second
-    clock.tick(60)
-    #-------------------------------------------------
-
-
-
-
-
-
 
     pygame.display.update()
 
-
-
-#plots results
+#plots for agent type 1 results
+'''
 fig1 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1, c = 'b')
 plt.plot(stepsA2,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
+plt.legend(["Agent 1 (Random)", "Agent 2 (Q-Learning)"])
+plt.title("Steps Per Episode")
+plt.ylabel("Steps")
+plt.xlabel("Episode")
+plt.show()
+'''
+
+#plots for agent type 2 results
+'''
+fig1 = plt.figure(figsize =(10, 8)) 
+plt.plot(stepsA1, c = 'b')
+plt.plot(stepsA2,  c = 'r')
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Steps Per Episode")
 plt.ylabel("Steps")
@@ -1457,7 +1262,7 @@ plt.xlabel("Episode")
 fig2 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1p1, c = 'b')
 plt.plot(stepsA2p1,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Steps Per Episode Puzzle1")
 plt.ylabel("Steps")
@@ -1465,7 +1270,7 @@ plt.xlabel("Episode")
 fig3 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1p2, c = 'b')
 plt.plot(stepsA2p2,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Steps Per Episode Puzzle2")
 plt.ylabel("Steps")
@@ -1473,7 +1278,7 @@ plt.xlabel("Episode")
 fig4 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1p3, c = 'b')
 plt.plot(stepsA2p3,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Steps Per Episode Puzzle3")
 plt.ylabel("Steps")
@@ -1481,7 +1286,7 @@ plt.xlabel("Episode")
 fig5 = plt.figure(figsize =(10, 8)) 
 plt.plot(costsa1, c = 'b')
 plt.plot(costsa2,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Reward Per Episode")
 plt.ylabel("Reward")
@@ -1489,7 +1294,7 @@ plt.xlabel("Episode")
 fig6 = plt.figure(figsize =(10, 8)) 
 plt.plot(costs_p1_a1, c = 'b')
 plt.plot(costs_p1_a2,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Reward Per Episode Puzzle1")
 plt.ylabel("Reward")
@@ -1497,7 +1302,7 @@ plt.xlabel("Episode")
 fig7 = plt.figure(figsize =(10, 8)) 
 plt.plot(costs_p2_a1, c = 'b')
 plt.plot(costs_p2_a2,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Reward Per Episode Puzzle2")
 plt.ylabel("Reward")
@@ -1505,44 +1310,32 @@ plt.xlabel("Episode")
 fig8 = plt.figure(figsize =(10, 8)) 
 plt.plot(costs_p3_a1, c = 'b')
 plt.plot(costs_p3_a2,  c = 'r')
-plt.xlim([1, 150])
+plt.xlim([1, number_of_rounds])
 plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Reward Per Episode Puzzle3")
 plt.ylabel("Reward")
 plt.xlabel("Episode")
-fig9 = plt.figure(figsize =(10, 8)) 
-plt.plot(epsi_p1_a1, c = 'b')
-plt.plot(epsi_p1_a2,  c = 'r')
-plt.xlim([1, 150])
-plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
-plt.title("Epsilon after Episode Puzzle1")
-plt.ylabel("Epsilon")
-plt.xlabel("Episode")
-fig10 = plt.figure(figsize =(10, 8)) 
-plt.plot(epsi_p2_a1, c = 'b')
-plt.plot(epsi_p2_a2,  c = 'r')
-plt.xlim([1, 150])
-plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
-plt.title("Epsilon after Episode Puzzle2")
-plt.ylabel("Epsilon")
-plt.xlabel("Episode")
-fig11 = plt.figure(figsize =(10, 8)) 
-plt.plot(epsi_p3_a1, c = 'b')
-plt.plot(epsi_p3_a2,  c = 'r')
-plt.xlim([1, 150])
-plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
-plt.title("Epsilon after Episode Puzzle3")
-plt.ylabel("Epsilon")
-plt.xlabel("Episode")
-
-
-
-
-
-
-
-
 plt.show()
+'''
+#plots for agent type 2 results
+'''
+fig1 = plt.figure(figsize =(10, 8)) 
+plt.plot(stepsA1, c = 'b')
+plt.plot(stepsA2,  c = 'r')
+plt.xlim([1, number_of_rounds])
+plt.legend(["Agent 1 (Random)", "Agent 2 (SARSA)"])
+plt.title("Steps Per Episode")
+plt.ylabel("Steps")
+plt.xlabel("Episode")
+plt.show()
+'''
+
+
+
+
+
+
+
 
 
 

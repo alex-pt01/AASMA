@@ -1,8 +1,8 @@
+# Implementation of Q-learning for puzzle2
+
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from functions import get_coordinates_puzzle2
-import time
 
 class puzzle2:
     def __init__(self,filename):
@@ -16,7 +16,6 @@ class puzzle2:
         self.boxes = get_coordinates_puzzle2(filename)[4]
         self.box1_location = get_coordinates_puzzle2(filename)[4][0]
         self.box2_location = get_coordinates_puzzle2(filename)[4][1]
-        #self.dock_location =  get_coordinates_puzzle2(filename)[5]
         self.dock1 = get_coordinates_puzzle2(filename)[5][0]
         self.dock2 = get_coordinates_puzzle2(filename)[5][1]
         self.init_walls = get_coordinates_puzzle2(filename)[3]
@@ -71,7 +70,7 @@ class puzzle2:
                 if self.box1_location == self.dock1:
                     self.box1_in_dock = 1
                     reward = 5
-                    #self.wall_coordinates.append(self.box1_location)
+                  
             
             elif((self.agent_location[0]-1, self.agent_location[1]) == self.box2_location and self.box2_location[0] >3):
 
@@ -82,7 +81,7 @@ class puzzle2:
                 if self.box2_location == self.dock2:
                     self.box2_in_dock = 1
                     reward = 5
-                    #self.wall_coordinates.append(self.box2_location)
+
 
         elif action == "DOWN": 
             if (self.agent_location[0]+1, self.agent_location[1]) not in self.wall_coordinates and   (self.agent_location[0]+1, self.agent_location[1]) != self.box1_location and (self.agent_location[0]+1, self.agent_location[1]) != self.box2_location:
@@ -145,7 +144,7 @@ class puzzle2:
         if self.box1_in_dock == 1 and self.box1_in_dock == 1:
             q_tar = reward
         else:
-            q_tar = reward + self.discount * self.Q.loc[next_state, :].max() #Q lauseke
+            q_tar = reward + self.discount * self.Q.loc[next_state, :].max() 
 
         
         if(self.greedy<self.eps_max):
@@ -195,7 +194,7 @@ class puzzle2:
 
             state = next_state
 
-            return action, win, cost, self.agent_location, self.greedy
+            return action, win, cost, self.agent_location
 
         
 

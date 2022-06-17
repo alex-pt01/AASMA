@@ -1,8 +1,8 @@
+# Implementation of SARSA for puzzle2
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from functions import get_coordinates_puzzle2
-import time
+
 
 class puzzle2_SARSA:
     def __init__(self,filename):
@@ -16,7 +16,6 @@ class puzzle2_SARSA:
         self.boxes = get_coordinates_puzzle2(filename)[4]
         self.box1_location = get_coordinates_puzzle2(filename)[4][0]
         self.box2_location = get_coordinates_puzzle2(filename)[4][1]
-        #self.dock_location =  get_coordinates_puzzle2(filename)[5]
         self.dock1 = get_coordinates_puzzle2(filename)[5][0]
         self.dock2 = get_coordinates_puzzle2(filename)[5][1]
         self.init_walls = get_coordinates_puzzle2(filename)[3]
@@ -70,7 +69,6 @@ class puzzle2_SARSA:
                 if self.box1_location == self.dock1:
                     self.box1_in_dock = 1
                     reward = 5
-                    #self.wall_coordinates.append(self.box1_location)
             
             elif((self.agent_location[0]-1, self.agent_location[1]) == self.box2_location and self.box2_location[0] >3):
              
@@ -81,7 +79,6 @@ class puzzle2_SARSA:
                 if self.box2_location == self.dock2:
                     self.box2_in_dock = 1
                     reward = 5
-                    #self.wall_coordinates.append(self.box2_location)
 
         elif action == "DOWN": 
             if (self.agent_location[0]+1, self.agent_location[1]) not in self.wall_coordinates and   (self.agent_location[0]+1, self.agent_location[1]) != self.box1_location and (self.agent_location[0]+1, self.agent_location[1]) != self.box2_location:
@@ -159,11 +156,8 @@ class puzzle2_SARSA:
         self.initial_agent_location =pos
         self.agent_location = pos
 
-    def run_puzzle(self, n): #muuta
-        # Resulted list for the plotting Episodes via Steps
-        steps = []
-        # Summed costs for all episodes in resulted list
-        all_costs = []
+    def run_puzzle(self, n): 
+
        
         for i in range(n):
             state = self.initial_agent_location
@@ -175,15 +169,8 @@ class puzzle2_SARSA:
 
             running = True
             while running:
-                
                 action = self.get_action(str(state))
-             
-                
                 next_state, reward, win = self.move(action)
-                
-                #Q-Learning e-greedy
-                #cost += self.learn( str(state), action, reward,str(next_state))
-                #SARSA e-greedy
                 next_action = self.get_action(str(next_state))
                 cost += self.SarsaLearn( str(state), action, reward, next_action, str(next_state))
                 state = next_state
@@ -191,8 +178,7 @@ class puzzle2_SARSA:
                 i+=1
 
                 if(win):
-                    steps += [i]
-                    all_costs += [cost]
+
                     running = False
 
     def run_one(self, c):
@@ -205,7 +191,7 @@ class puzzle2_SARSA:
 
             state = next_state
             self.action=next_action
-            return next_action, win, cost, self.agent_location, self.greedy
+            return next_action, win, cost, self.agent_location
 
         
 
