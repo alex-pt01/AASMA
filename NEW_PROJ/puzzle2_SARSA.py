@@ -153,10 +153,11 @@ class puzzle2_SARSA:
             )
         prediction = self.Q.loc[state,action]
 
-        if next_state != 'goal' or next_state != 'obstacle':
-            target = reward + self.discount * self.Q.loc[next_state, next_action]
-        else:
+        if self.box1_in_dock == 1 and self.box1_in_dock == 1:
             target = reward
+        else:
+            target = reward + self.discount * self.Q.loc[next_state, next_action]
+
 
         if(self.greedy<self.eps_max):
             self.greedy+= self.eps_add

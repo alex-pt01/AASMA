@@ -127,10 +127,10 @@ class puzzle13_SARSA:
             )
         prediction = self.Q.loc[state,action]
 
-        if next_state != 'goal' or next_state != 'obstacle':
-            target = reward + self.discount * self.Q.loc[next_state, next_action]
-        else:
+        if next_state == self.goal:
             target = reward
+        else:
+            target = reward + self.discount * self.Q.loc[next_state, next_action]
 
         if(self.greedy<self.eps_max):
             self.greedy+= self.eps_add
@@ -197,5 +197,5 @@ def main():
     puzzle.run_puzzle(100)
     print(puzzle.shortest)
 if __name__ == '__main__':
-    # This code won't run if this file is imported.
+   
     main()
