@@ -96,11 +96,12 @@ class DQNAgent2:
         self.mem_cntr +=1
     
     def choose_action(self, observation):
-        if np.random.random() > self.epsilon:
+        if np.random.uniform() < self.epsilon:
             state = torch.tensor([observation]).to(self.Q_eval.device)
             actions = self.Q_eval.forward(state)
             action = torch.argmax(actions).item()
         else:
+            print("random")
             action = np.random.choice(self.action_space)
         return action
 
@@ -138,7 +139,7 @@ class DQNAgent2:
         else:
             self.epsilon = self.eps_max
     
-
+        
 
     def move(self,action):
             reward = -0.1
@@ -223,6 +224,7 @@ class DQNAgent2:
             while not done:
                 action = self.choose_action(observation)
                 new_state, reward, done = self.move(action)
+                print(reward)
                 score += reward
                 self.store_transition(observation, action, reward, new_state, done)
                 observation = new_state
@@ -249,6 +251,7 @@ class DQNAgent2:
         state = (self.observation[0],self.observation[1], np.float32(self.box1_location[0]),np.float32(self.box1_location[1]), np.float32(self.box2_location[0]), np.float32(self.box2_location[1]))
         action = self.choose_action(state)       
         next_state, reward, win = self.move(action)
+        print(reward)
         cost = c+ reward
         pos = (next_state[0],next_state[1])
         self.store_transition(state, action, reward, next_state,win)
@@ -260,9 +263,9 @@ class DQNAgent2:
 def main():
     #def __init__(self,filename, input_dims, batch_size, gamma, epsilon, num_actions,
     # max_mem_size = 100000, eps_end=0.01, eps_dec=5e-4, discount = 1.0,learning_rate =0.7):
-    dq = DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
+    dq = DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4,
                   input_dims=[6], lr=0.001)
-    dq.run_puzzle(1)
+    dq.run_puzzle(10)
 if __name__ == '__main__':
     # This code won't run if this file is imported.
     main()

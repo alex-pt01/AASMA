@@ -94,11 +94,12 @@ class DQNAgent13:
         self.mem_cntr +=1
     
     def choose_action(self, observation):
-        if np.random.random() > self.epsilon:
+        if np.random.uniform() < self.epsilon:
             state = torch.tensor([observation]).to(self.Q_eval.device)
             actions = self.Q_eval.forward(state)
             action = torch.argmax(actions).item()
         else:
+            print("random")
             action = np.random.choice(self.action_space)
         return action
 
@@ -155,14 +156,14 @@ class DQNAgent13:
         new_state = (np.float32(self.observation[0]),np.float32(self.observation[1]))
    
         if new_state == self.goal:
-            reward = 10
+            reward = 50
             win = True
             self.paths.append(self.remember)
             if len(self.shortest)>len(self.remember) or len(self.shortest) == 0:
                 self.shortest = self.remember
             self.remember = []
         else:
-            reward = -0.5
+            reward = -1
             new_distance = manhattan_distance(self.observation, self.goal)
             if new_distance < self.last_distance:
                 reward = 0.1
@@ -217,8 +218,8 @@ class DQNAgent13:
         self.last_distance = manhattan_distance(pos,self.goal)
 
 def main():
-    dq = DQNAgent13("./puzzle_splitted3.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
-                  input_dims=[2], lr=0.001)
+    dq = DQNAgent13("./puzzle_splitted3.txt", gamma=0.99, epsilon=0.9, batch_size=64, n_actions=4,
+                  input_dims=[2], lr=0.9)
 if __name__ == '__main__':
    
     main()

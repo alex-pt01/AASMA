@@ -14,7 +14,8 @@ from QL2 import puzzle2
 from DQN13 import DQNAgent13
 from DQN2 import DQNAgent2
 import matplotlib.pyplot as plt
-
+from puzzle2_SARSA import puzzle2_SARSA
+from puzzle13_SARSA import puzzle13_SARSA
 import numpy as np
 
 class game:
@@ -669,13 +670,16 @@ puzzle1 = puzzle13("./puzzle_splitted1.txt", (3, 1))
 puzzle_2= puzzle2("./puzzle_splited2.txt")
 puzzle_3 = puzzle13("./puzzle_splitted3.txt", (3, 1))
 
-p1_DQN = True
-p2_DQN = False
-p3_DQN = False
+p1_SARSA = True
+p2_SARSA = False
+p3_SARSA = False
 
-puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4,input_dims=[2], lr=0.001)
-puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[6], lr=0.001)
-puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, input_dims=[2], lr=0.001)
+#puzzle1_DQN =  DQNAgent13("./puzzle_splitted1.txt",(3, 1), gamma=0.99, epsilon=0.5, batch_size=64, n_actions=4,input_dims=[2], lr=0.001)
+#puzzle2_DQN=  DQNAgent2("./puzzle_splited2.txt", gamma=0.99, epsilon=0.5, batch_size=64, n_actions=4, input_dims=[6], lr=0.9)
+#puzzle3_DQN = DQNAgent13("./puzzle_splitted3.txt",(3, 1), gamma=0.99, epsilon=5, batch_size=64, n_actions=4, input_dims=[2], lr=0.001)
+puzzle_1_SARSA = puzzle13_SARSA("./puzzle_splitted1.txt", (3, 1))
+puzzle_2_SARSA= puzzle2_SARSA("./puzzle_splited2.txt")
+puzzle_3_SARSA = puzzle13_SARSA("./puzzle_splitted3.txt", (3, 1))
 
 
 """
@@ -798,7 +802,7 @@ costa1 = 0
 
 costa2 = 0
 
-number_of_rounds = 200
+number_of_rounds = 150
 i = 0
 while i < number_of_rounds:
     print("round")
@@ -947,27 +951,28 @@ while i < number_of_rounds:
         
 
     
-    #DQN vs Q-Learning -----------------------------------------------------------------------------------------------------
+    #SARSAvs Q-Learning -----------------------------------------------------------------------------------------------------
     elif int(agent_type) ==2: 
         #Agent1 -> User input
         if not a1_done:
-            #Agent1 -> DQN
+            #Agent1 -> SARSA
             steps_A1 += 1
-            if p1_DQN:
+            if p1_SARSA:
                 
-                action,win, cost_p1_a1=  puzzle1_DQN.run_one(cost_p1_a1)
+                action,win, cost_p1_a1=  puzzle_1_SARSA.run_one(cost_p1_a1)
+    
                 steps_A1_p1 +=1
                # print("COST", cost)
-                if action == 2: 
+                if action == 'UP': 
                     game.move(0,-1, True, a1)
-                    # +=1
-                elif action == 3: 
-                    game.move(0,1, True, a1)
-                    #steps_A2_p1 +=1
-                elif action == 0: 
-                    game.move(-1,0, True,  a1)
                     # steps_A2_p1 +=1
-                elif action == 1: 
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a1)
+                    # steps_A2_p1 +=1
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a1)
+                    #steps_A2_p1 +=1
+                elif action == 'RIGHT': 
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
@@ -975,24 +980,24 @@ while i < number_of_rounds:
                     stepsA1p1.append(steps_A1_p1)
                     steps_A1_p1 = 0
                     time_A2_p1_final = time.time() - time_A2_p1_init
-                    puzzle1_DQN.change_init_position( (np.float32(3), np.float32(1)))
-                    p1_DQN = False
-                    p2_DQN = True
+                    puzzle_1_SARSA.change_init_position( (np.float32(3), np.float32(1)))
+                    p1_SARSA = False
+                    p2_SARSA = True
             
-            if p2_DQN:
+            if p2_SARSA:
                 steps_A1_p2 +=1
-                action, win, cost_p2_a1, pos = puzzle2_DQN.run_one(cost_p2_a1)
+                action, win, cost_p2_a1, pos = puzzle_2_SARSA.run_one(cost_p2_a1)
                 #print("p2")
-                if action == 2: 
+                if action == 'UP': 
                     game.move(0,-1, True, a1)
-                    #steps_A2_p1 +=1
-                elif action == 3: 
-                    game.move(0,1, True, a1)
-                    #steps_A2_p1 +=1
-                elif action == 0: 
-                    game.move(-1,0, True,  a1)
                     # steps_A2_p1 +=1
-                elif action == 1: 
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a1)
+                    # steps_A2_p1 +=1
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a1)
+                    #steps_A2_p1 +=1
+                elif action == 'RIGHT': 
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
@@ -1000,26 +1005,26 @@ while i < number_of_rounds:
                     stepsA1p2.append(steps_A1_p2)
                     steps_A1_p2 = 0
                     time_A2_p2_final = time.time() - time_A2_p2_init
-                    p2_DQN = False
-                    p3_DQN = True
-                    puzzle3_DQN.change_init_position((np.float32(12),np.float32(pos[1])))
-                    puzzle2_DQN.reset()
+                    p2_SARSA = False
+                    p3_SARSA = True
+                    puzzle_3_SARSA.change_init_position((12,pos[1]))
+                    puzzle_2_SARSA.reset()
 
 
-            if p3_DQN:
+            if p3_SARSA:
                 steps_A1_p3 +=1
                 time1=time.time()
-                action, win, cost_p3_a1 = puzzle3_DQN.run_one(cost_p3_a1)
-                if action == 2: 
+                action, win, cost_p3_a1 =  puzzle_3_SARSA.run_one(cost_p3_a1)
+                if action == 'UP': 
                     game.move(0,-1, True, a1)
-                    #steps_A2_p1 +=1
-                elif action == 3: 
-                    game.move(0,1, True, a1)
-                    #steps_A2_p1 +=1
-                elif action == 0: 
-                    game.move(-1,0, True,  a1)
                     # steps_A2_p1 +=1
-                elif action == 1: 
+                elif action == 'DOWN': 
+                    game.move(0,1, True, a1)
+                    # steps_A2_p1 +=1
+                elif action == 'LEFT': 
+                    game.move(-1,0, True,  a1)
+                    #steps_A2_p1 +=1
+                elif action == 'RIGHT': 
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
@@ -1033,9 +1038,9 @@ while i < number_of_rounds:
                     steps_A1_p3 = 0
                     a1_done = True
                     time_A2_p3_final = time.time() - time_A2_p3_init
-                    p1_DQN = True
-                    p2_DQN = False
-                    p3_DQN = False
+                    p1_SARSA = True
+                    p2_SARSA = False
+                    p3_SARSA = False
                    
                     #steps_A2_p1= 0
                     #steps_A2_p2= 0
@@ -1418,62 +1423,70 @@ while i < number_of_rounds:
 
 
 #plots results
-fig1 = plt.figure(figsize =(5, 4)) 
+fig1 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1, c = 'b')
 plt.plot(stepsA2,  c = 'r')
+plt.xlim([1, 150])
 plt.legend(["Agent 1", "Agent 2"])
-plt.title("Steps per round")
+plt.title("Steps Per Episode")
 plt.ylabel("Steps")
-plt.xlabel("Rounds")
-fig2 = plt.figure(figsize =(5, 4)) 
+plt.xlabel("Episode")
+fig2 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1p1, c = 'b')
 plt.plot(stepsA2p1,  c = 'r')
+plt.xlim([1, 150])
 plt.legend(["Agent 1", "Agent 2"])
-plt.title("Steps per round puzzle1")
+plt.title("Steps Per Episode Puzzle1")
 plt.ylabel("Steps")
-plt.xlabel("Rounds")
-fig3 = plt.figure(figsize =(5, 4)) 
+plt.xlabel("Episode")
+fig3 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1p2, c = 'b')
 plt.plot(stepsA2p2,  c = 'r')
-plt.legend(["Agent 1", "Agent 2"])
-plt.title("Steps per round puzzle2")
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Steps Per Episode Puzzle2")
 plt.ylabel("Steps")
-plt.xlabel("Rounds")
-fig4 = plt.figure(figsize =(5, 4)) 
+plt.xlabel("Episode")
+fig4 = plt.figure(figsize =(10, 8)) 
 plt.plot(stepsA1p3, c = 'b')
 plt.plot(stepsA2p3,  c = 'r')
-plt.legend(["Agent 1", "Agent 2"])
-plt.title("Steps per round puzzle3")
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Steps Per Episode Puzzle3")
 plt.ylabel("Steps")
-plt.xlabel("Rounds")
-fig5 = plt.figure(figsize =(5, 4)) 
+plt.xlabel("Episode")
+fig5 = plt.figure(figsize =(10, 8)) 
 plt.plot(costsa1, c = 'b')
 plt.plot(costsa2,  c = 'r')
-plt.legend(["Agent 1", "Agent 2"])
-plt.title("Reward per round")
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Reward Per Episode")
 plt.ylabel("Reward")
-plt.xlabel("Rounds")
-fig6 = plt.figure(figsize =(5, 4)) 
+plt.xlabel("Episode")
+fig6 = plt.figure(figsize =(10, 8)) 
 plt.plot(costs_p1_a1, c = 'b')
 plt.plot(costs_p1_a2,  c = 'r')
-plt.legend(["Agent 1", "Agent 2"])
-plt.title("Reward per round puzzle1")
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Reward Per Episode Puzzle1")
 plt.ylabel("Reward")
-plt.xlabel("Rounds")
-fig7 = plt.figure(figsize =(5, 4)) 
+plt.xlabel("Episode")
+fig7 = plt.figure(figsize =(10, 8)) 
 plt.plot(costs_p2_a1, c = 'b')
 plt.plot(costs_p2_a2,  c = 'r')
-plt.legend(["Agent 1", "Agent 2"])
-plt.title("Reward per round puzzle2")
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Reward Per Episode Puzzle2")
 plt.ylabel("Reward")
-plt.xlabel("Rounds")
-fig8 = plt.figure(figsize =(5, 4)) 
+plt.xlabel("Episode")
+fig8 = plt.figure() 
 plt.plot(costs_p3_a1, c = 'b')
 plt.plot(costs_p3_a2,  c = 'r')
-plt.legend(["Agent 1", "Agent 2"])
-plt.title("Reward per round puzzle3")
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Reward Per Episode Puzzle3")
 plt.ylabel("Reward")
-plt.xlabel("Rounds")
+plt.xlabel("Episode")
 
 
 
