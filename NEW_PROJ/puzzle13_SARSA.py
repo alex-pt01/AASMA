@@ -189,7 +189,7 @@ class puzzle13_SARSA:
 
             state = next_state
             self.action=next_action
-            return next_action, win, cost
+            return next_action, win, cost, self.greedy
 
 
 def main():

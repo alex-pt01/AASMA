@@ -106,7 +106,7 @@ class puzzle2:
 
         self.remember.append(action)
     
-        new_state = (self.agent_location[0],self.agent_location[1], self.box1_in_dock,self.box2_in_dock)
+        new_state = (self.agent_location[0],self.agent_location[1], self.box1_location[0], self.box1_location[1],self.box2_location[0], self.box2_location[1])
 
         if self.box1_in_dock == 1 and self.box2_in_dock == 1:
     
@@ -161,7 +161,7 @@ class puzzle2:
         self.initial_agent_location =pos
         self.agent_location = pos
 
-    def run_puzzle(self, n): #muuta
+    def run_puzzle(self, n):
  
         for i in range(n):
             state = self.initial_agent_location
@@ -187,7 +187,7 @@ class puzzle2:
                     running = False
 
     def run_one(self, c):
-            state = self.agent_location   
+            state = (self.agent_location[0],self.agent_location[1], self.box1_location[0], self.box1_location[1],self.box2_location[0], self.box2_location[1])
             cost = c  
             action = self.get_action(str(state))  
             next_state, reward, win = self.move(action)
@@ -195,7 +195,7 @@ class puzzle2:
 
             state = next_state
 
-            return action, win, cost, self.agent_location
+            return action, win, cost, self.agent_location, self.greedy
 
         
 
@@ -204,7 +204,7 @@ class puzzle2:
 
 
 def main():
-    puzzle = puzzle2("./p_split2.txt")
+    puzzle = puzzle2("./puzzle_splited2.txt")
     puzzle.run_one(0)
    
     #print(puzzle.shortest)

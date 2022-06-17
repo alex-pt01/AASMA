@@ -133,7 +133,7 @@ class puzzle13:
 
             state = next_state
 
-            return action, win, cost
+            return action, win, cost, self.greedy
 
 
 

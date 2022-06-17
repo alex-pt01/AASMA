@@ -797,6 +797,23 @@ costs_p1_a2 = []
 costs_p2_a2 = []
 costs_p3_a2 = []
 
+eps_p1_a1 = 0
+eps_p2_a1 = 0
+eps_p3_a1 = 0
+
+eps_p1_a2 = 0
+eps_p2_a2 = 0
+eps_p3_a2 = 0
+
+
+epsi_p1_a1 = []
+epsi_p2_a1 = []
+epsi_p3_a1 = []
+
+epsi_p1_a2 = []
+epsi_p2_a2 = []
+epsi_p3_a2 = []
+
 
 costa1 = 0
 
@@ -959,7 +976,7 @@ while i < number_of_rounds:
             steps_A1 += 1
             if p1_SARSA:
                 
-                action,win, cost_p1_a1=  puzzle_1_SARSA.run_one(cost_p1_a1)
+                action,win, cost_p1_a1, eps_p1_a1 =  puzzle_1_SARSA.run_one(cost_p1_a1)
     
                 steps_A1_p1 +=1
                # print("COST", cost)
@@ -976,6 +993,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    epsi_p1_a1.append(eps_p1_a1)
                     costs_p1_a1.append(cost_p1_a1)
                     stepsA1p1.append(steps_A1_p1)
                     steps_A1_p1 = 0
@@ -986,7 +1004,7 @@ while i < number_of_rounds:
             
             if p2_SARSA:
                 steps_A1_p2 +=1
-                action, win, cost_p2_a1, pos = puzzle_2_SARSA.run_one(cost_p2_a1)
+                action, win, cost_p2_a1, pos, eps_p2_a1 = puzzle_2_SARSA.run_one(cost_p2_a1)
                 #print("p2")
                 if action == 'UP': 
                     game.move(0,-1, True, a1)
@@ -1001,6 +1019,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    epsi_p2_a1.append(eps_p2_a1)
                     costs_p2_a1.append(cost_p2_a1)
                     stepsA1p2.append(steps_A1_p2)
                     steps_A1_p2 = 0
@@ -1014,7 +1033,7 @@ while i < number_of_rounds:
             if p3_SARSA:
                 steps_A1_p3 +=1
                 time1=time.time()
-                action, win, cost_p3_a1 =  puzzle_3_SARSA.run_one(cost_p3_a1)
+                action, win, cost_p3_a1, eps_p3_a1 =  puzzle_3_SARSA.run_one(cost_p3_a1)
                 if action == 'UP': 
                     game.move(0,-1, True, a1)
                     # steps_A2_p1 +=1
@@ -1028,6 +1047,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a1)
                     #steps_A2_p1 +=1
                 if win:
+                    epsi_p3_a1.append(eps_p3_a1)
                     costs_p3_a1.append(cost_p3_a1)
                     costsa1.append(cost_p1_a1+cost_p2_a1+cost_p3_a1)
                     cost_p1_a1=0
@@ -1057,7 +1077,7 @@ while i < number_of_rounds:
           
             if p1:
                 steps_A2_p1 +=1
-                action,win, cost_p1_a2 =  puzzle1.run_one(cost_p1_a2)
+                action,win, cost_p1_a2, eps_p1_a2 =  puzzle1.run_one(cost_p1_a2)
                 #print("COST", cost)
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
@@ -1072,6 +1092,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a2)
                     #steps_A2_p1 +=1
                 if win:
+                    epsi_p1_a2.append(eps_p1_a2)
                     costs_p1_a2.append(cost_p1_a2)
                     stepsA2p1.append(steps_A2_p1)
                     steps_A2_p1 = 0
@@ -1082,7 +1103,7 @@ while i < number_of_rounds:
             
             if p2:
                 steps_A2_p2 +=1
-                action, win, cost_p2_a2, pos = puzzle_2.run_one(cost_p2_a2)
+                action, win, cost_p2_a2, pos, eps_p2_a2 = puzzle_2.run_one(cost_p2_a2)
                 #print("p2")
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
@@ -1097,6 +1118,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a2)
                     # steps_A2_p2 +=1
                 if win:
+                    epsi_p2_a2.append(eps_p2_a2)
                     costs_p2_a2.append(cost_p2_a2)
                     stepsA2p2.append(steps_A2_p2)
                     steps_A2_p2 = 0
@@ -1110,7 +1132,7 @@ while i < number_of_rounds:
             if p3:
                 steps_A2_p3 +=1
                 time1=time.time()
-                action, win, cost_p3_a2 = puzzle_3.run_one(cost_p3_a2)
+                action, win, cost_p3_a2, eps_p3_a2= puzzle_3.run_one(cost_p3_a2)
                 if action == 'UP': 
                     game.move(0,-1, True, a2)
                     # steps_A2_p3 +=1
@@ -1124,6 +1146,7 @@ while i < number_of_rounds:
                     game.move(1,0, True,  a2)
                     # steps_A2_p3 +=1
                 if win:
+                    epsi_p3_a2.append(eps_p3_a2)
                     costs_p3_a2.append(cost_p3_a2)
                     costsa2.append(cost_p1_a2+cost_p2_a2+cost_p3_a2)
                     cost_p1_a2=0
@@ -1427,7 +1450,7 @@ fig1 = plt.figure(figsize =(10, 8))
 plt.plot(stepsA1, c = 'b')
 plt.plot(stepsA2,  c = 'r')
 plt.xlim([1, 150])
-plt.legend(["Agent 1", "Agent 2"])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Steps Per Episode")
 plt.ylabel("Steps")
 plt.xlabel("Episode")
@@ -1435,7 +1458,7 @@ fig2 = plt.figure(figsize =(10, 8))
 plt.plot(stepsA1p1, c = 'b')
 plt.plot(stepsA2p1,  c = 'r')
 plt.xlim([1, 150])
-plt.legend(["Agent 1", "Agent 2"])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Steps Per Episode Puzzle1")
 plt.ylabel("Steps")
 plt.xlabel("Episode")
@@ -1479,7 +1502,7 @@ plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Reward Per Episode Puzzle2")
 plt.ylabel("Reward")
 plt.xlabel("Episode")
-fig8 = plt.figure() 
+fig8 = plt.figure(figsize =(10, 8)) 
 plt.plot(costs_p3_a1, c = 'b')
 plt.plot(costs_p3_a2,  c = 'r')
 plt.xlim([1, 150])
@@ -1487,7 +1510,30 @@ plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
 plt.title("Reward Per Episode Puzzle3")
 plt.ylabel("Reward")
 plt.xlabel("Episode")
-
+fig9 = plt.figure(figsize =(10, 8)) 
+plt.plot(epsi_p1_a1, c = 'b')
+plt.plot(epsi_p1_a2,  c = 'r')
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Epsilon after Episode Puzzle1")
+plt.ylabel("Epsilon")
+plt.xlabel("Episode")
+fig10 = plt.figure(figsize =(10, 8)) 
+plt.plot(epsi_p2_a1, c = 'b')
+plt.plot(epsi_p2_a2,  c = 'r')
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Epsilon after Episode Puzzle2")
+plt.ylabel("Epsilon")
+plt.xlabel("Episode")
+fig11 = plt.figure(figsize =(10, 8)) 
+plt.plot(epsi_p3_a1, c = 'b')
+plt.plot(epsi_p3_a2,  c = 'r')
+plt.xlim([1, 150])
+plt.legend(["Agent 1 (SARSA)", "Agent 2 (Q-Learning)"])
+plt.title("Epsilon after Episode Puzzle3")
+plt.ylabel("Epsilon")
+plt.xlabel("Episode")
 
 
 

@@ -104,7 +104,7 @@ class puzzle2_SARSA:
 
 
         self.remember.append(action)
-        new_state = (self.agent_location[0],self.agent_location[1], self.box1_in_dock,self.box2_in_dock)
+        new_state =(self.agent_location[0],self.agent_location[1], self.box1_location[0], self.box1_location[1],self.box2_location[0], self.box2_location[1])
      
         if self.box1_in_dock == 1 and self.box2_in_dock == 1:
     
@@ -122,14 +122,8 @@ class puzzle2_SARSA:
 
 
     def get_action(self,state):
-        if state not in self.Q.index:#Muuta!!
-             self.Q = self.Q.append(
-                pd.Series(
-                    [0]*len(self.actions),
-                    index=self.Q.columns,
-                    name=state,
-                )
-            )
+        if state not in self.Q.index:
+             self.Q = self.Q.append( pd.Series( [0,0,0,0], index=self.Q.columns,name=state ) )
 
         random = np.random.uniform()
         if self.greedy < random:
@@ -142,15 +136,9 @@ class puzzle2_SARSA:
 
 
     def SarsaLearn(self, state, action, reward, next_action, next_state):
-        #Verifies if State exists
         if next_state not in self.Q.index:
-            self.Q = self.Q.append(
-                pd.Series(
-                    [0]*len(self.actions),
-                    index=self.Q.columns,
-                    name=next_state,
-                )
-            )
+             self.Q = self.Q.append( pd.Series( [0,0,0,0], index=self.Q.columns,name=next_state ) )
+
         prediction = self.Q.loc[state,action]
 
         if self.box1_in_dock == 1 and self.box1_in_dock == 1:
@@ -208,7 +196,7 @@ class puzzle2_SARSA:
                     running = False
 
     def run_one(self, c):
-            state = self.agent_location   
+            state =(self.agent_location[0],self.agent_location[1], self.box1_location[0], self.box1_location[1],self.box2_location[0], self.box2_location[1])
             action = self.get_action(str(state))
             cost = c 
             next_action = self.get_action(str(state)) 
@@ -217,7 +205,7 @@ class puzzle2_SARSA:
 
             state = next_state
             self.action=next_action
-            return next_action, win, cost, self.agent_location
+            return next_action, win, cost, self.agent_location, self.greedy
 
         
 
